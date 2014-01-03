@@ -1,10 +1,7 @@
 package com.formation.computerdb.servlet;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,30 +14,39 @@ import org.slf4j.LoggerFactory;
 
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
+import com.formation.computerdb.dto.ComputerDto;
+import com.formation.computerdb.mapper.ComputerMapper;
 import com.formation.computerdb.service.DataService;
 import com.formation.computerdb.validator.ComputerValidator;
 
+/**
+ * Computer edition servlet
+ * @author F. Miglianico
+ *
+ */
 @WebServlet("/editComputer")
 public class EditComputerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private Long id = null;
 	private static Logger log = LoggerFactory.getLogger(EditComputerServlet.class);
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
 		
+		// Get companies
 		DataService ds = DataService.getInstance();
 		
-		ArrayList<Company> companies = ds.getAllCompanies();
+		List<Company> companies = ds.getAllCompanies();
 		request.setAttribute("companies", companies);
 		
+		// Get computer to be edited
 		id = Long.valueOf((String)request.getParameter("id"));
 		if(id == null)
 			response.sendRedirect("dashboard");
 		
 		Computer computer = ds.getComputer(id.intValue());
-		request.setAttribute("computer", computer);
+		ComputerDto cdto = ComputerMapper.toDto(computer);
+		request.setAttribute("cdto", cdto);
 
 		request.getRequestDispatcher( "WEB-INF/editComputer.jsp" ).forward(request, response);
 
@@ -49,35 +55,44 @@ public class EditComputerServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
 		
+		// Get Computer attribute into Dto
+		ComputerDto cdto = new ComputerDto();
+		cdto.setId(id);
+		cdto.setName(request.getParameter("name"));
+		cdto.setIntroduced(request.getParameter("introduced"));
+		cdto.setDiscontinued(request.getParameter("discontinued"));
+		cdto.setCompanyId(Long.valueOf(request.getParameter("company")));
 		
-		String name = request.getParameter("name");
-		String introduced = request.getParameter("introduced");
-		String discontinued = request.getParameter("discontinued");
+		if(cdto.getCompanyId() == 0)
+			cdto.setCompanyId(null);
 		
-		if(!ComputerValidator.isValid(name, introduced, discontinued))
-			response.sendRedirect("dashboard");
+		// Validate values
+		int retCode = ComputerValidator.isValid(cdto);
 		
-		Date introducedDate = null, discontinuedDate = null;
-		
-		try {
-
-			introducedDate = sdf.parse(introduced);
-			discontinuedDate = sdf.parse(discontinued);
-		} catch (ParseException e) {
-			log.error("Warning : " + e.getMessage());
+		// if computer is not valid, notify user
+		if(retCode != 0) {
+			request.setAttribute("retCode", retCode);
+			request.setAttribute("cdto", cdto);
+			
+			DataService ds = DataService.getInstance();
+			List<Company> companies = ds.getAllCompanies();
+			request.setAttribute("companies", companies);
+			
+			request.getRequestDispatcher("WEB-INF/editComputer.jsp").forward(request, response);
+			
+			return;
 		}
 
-		Long companyID = Long.valueOf(request.getParameter("company"));
+		// Else, update computer in DB
+		Computer computer = ComputerMapper.fromDto(cdto);
 		
 		DataService ds = DataService.getInstance();
 
-		Company company = ds.getCompany(companyID.intValue());
-		
-		Computer computer = new Computer(id, name, company, introducedDate, discontinuedDate);
-
 		ds.updateComputer(computer);
+		
+		log.info(new StringBuilder("Edition of computer \"").append(computer.getName()).append("\" successful").toString());
 
-		response.sendRedirect("dashboard");
+		response.sendRedirect("dashboard?message=editOK");
 		//request.getRequestDispatcher( "WEB-INF/dashboard.jsp").forward(request, response);
 
 	}

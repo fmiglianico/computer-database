@@ -1,13 +1,19 @@
 package com.formation.computerdb.service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import com.formation.computerdb.dao.CompanyDAO;
 import com.formation.computerdb.dao.ComputerDAO;
 import com.formation.computerdb.dao.DAOFactory;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
+import com.formation.computerdb.domain.Page;
 
+/**
+ * Data service to access DAO functionalities
+ * @author F. Miglianico
+ *
+ */
 public class DataService {
 	
 	private static final DataService INSTANCE = new DataService();
@@ -22,10 +28,6 @@ public class DataService {
 	
 	public static DataService getInstance() {
 		return INSTANCE;
-	}
-	
-	public ArrayList<Computer> getAllComputers(int offset, int max, String orderBy, String dir) {
-		return computerDAO.getAll(offset, max, orderBy, dir);
 	}
 	
 	public Computer getComputer(int id) {
@@ -44,15 +46,15 @@ public class DataService {
 		computerDAO.delete(id);
 	}
 	
-	public ArrayList<Computer> searchComputer(String search, int offset, int max, String orderBy, String dir) {
-		return computerDAO.search(search, offset, max, orderBy, dir);
+	public void fill(Page page) {
+		computerDAO.fill(page);
 	}
 	
 	public int countComputers(String search) {
 		return computerDAO.count(search);
 	}
 	
-	public ArrayList<Company> getAllCompanies() {
+	public List<Company> getAllCompanies() {
 		return companyDAO.getAll();
 	}
 	

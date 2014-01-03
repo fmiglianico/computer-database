@@ -10,6 +10,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.formation.computerdb.service.DataService;
 
+/**
+ * Servlet called for deletion of a computer
+ * @author F. Miglianico
+ *
+ */
 @WebServlet("/deleteComputer")
 public class DeleteComputerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -17,15 +22,18 @@ public class DeleteComputerServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
 
+		// Id of computer
 		Long id = Long.valueOf(request.getParameter("id"));
-		if(id == null)
+		if(id == null) {
 			response.sendRedirect("dashboard");
+			return;
+		}
 		
 		DataService ds = DataService.getInstance();
 		
 		ds.deleteComputer(id.intValue());
 
-		response.sendRedirect("dashboard");
+		response.sendRedirect("dashboard?message=deleteOK");
 
 	}
 }

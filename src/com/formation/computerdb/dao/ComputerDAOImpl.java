@@ -4,102 +4,55 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.formation.computerdb.common.OrderByColumn;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
+import com.formation.computerdb.domain.Page;
 
+/**
+ * Implementation of the interface @ComputerDAO
+ * @author F. Miglianico
+ *
+ */
 public class ComputerDAOImpl implements ComputerDAO {
 	
-	private static DBHandler handler = null;
-	private Logger log;
+	private static Logger log = LoggerFactory.getLogger(ComputerDAOImpl.class);
 	
 	protected ComputerDAOImpl() {
-		log = LoggerFactory.getLogger(this.getClass());
 	}
 
-	public ArrayList<Computer> getAll(int offset, int max, String orderBy, String dir) {
-		if(handler == null) {
-			handler = DBHandler.getInstance();
-		}
-
-		ArrayList<Computer> computers = new ArrayList<Computer>();
-		ResultSet rs = null;
-		Connection conn = null;
-
-		try {
-			conn = handler.getConn();
-			
-			int orderCol = 1;
-			if(orderBy != null) {
-				if(orderBy.equals("name"))
-					orderCol = 2;
-				else if(orderBy.equals("intro"))
-					orderCol = 3;
-				else if(orderBy.equals("disco"))
-					orderCol = 4;
-				else if(orderBy.equals("company"))
-					orderCol = 6;
-			}
-			
-			String dirString = "ASC";
-			if(dir != null) {
-				dir = dir.toLowerCase();
-				if(dir.equals("desc"))
-					dirString = "DESC";
-			}
-			
-			String query = "SELECT cr.id, cr.name, cr.introduced, cr.discontinued, cy.id, cy.name "
-					+ "FROM computer AS cr "
-					+ "LEFT JOIN company AS cy ON cr.company_id = cy.id "
-					+ "ORDER BY " + orderCol + " " + dirString + " "
-					+ "LIMIT " + offset + ", " + max;
-			rs = handler.executeQueryRS(conn, query);
-
-			// Traitement a faire ici sur le resultset
-			while(rs.next())
-				computers.add(mapComputer(rs));
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				log.error("Error in finally: " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		return computers;
-	}
-
+	/**
+	 * Get a computer
+	 * @param id the id
+	 */
 	public Computer get(int id) {
-
-		if(handler == null) {
-			handler = DBHandler.getInstance();
-		}
 
 		Computer computer = null;
 		ResultSet rs = null;
 		Connection conn = null;
 
 		try {
-			conn = handler.getConn();
+			// Get the connection
+			conn = DAOFactory.INSTANCE.getConn();
 
-			String query = "SELECT cr.id, cr.name, cr.introduced, cr.discontinued, cy.id, cy.name "
-					+ "FROM computer AS cr "
-					+ "LEFT JOIN company AS cy ON cr.company_id = cy.id "
-					+ "WHERE cr.id = " + id;
-			rs = handler.executeQueryRS(conn, query);
+			// Build the query
+			StringBuilder query = new StringBuilder("SELECT cr.id, cr.name, cr.introduced, cr.discontinued, cy.id, cy.name ");
+			query.append("FROM computer AS cr ");
+			query.append("LEFT JOIN company AS cy ON cr.company_id = cy.id ");
+			query.append("WHERE cr.id = ").append(id);
 
-			// Traitement a faire ici sur le resultset
+			// Create hte statement
+			Statement statement = conn.createStatement();
+			rs = statement.executeQuery(query.toString());
+
+			// Process the result
 			if(rs.next())
 				computer = mapComputer(rs);
 
@@ -121,19 +74,17 @@ public class ComputerDAOImpl implements ComputerDAO {
 		return computer;
 	}
 	
+	/**
+	 * Create a computer in DB
+	 */
 	public void create(Computer computer) {
-
-		if(handler == null) {
-			handler = DBHandler.getInstance();
-		}
 		
 		Connection conn = null;
 
 		try {
-			conn = handler.getConn();
+			conn = DAOFactory.INSTANCE.getConn();
 			
-			String query = "INSERT INTO computer (name, company_id, introduced, discontinued) "
-					+ "VALUES (?, ?, ?, ?)";
+			String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
 			
 			PreparedStatement statement = conn.prepareStatement(query);
 			statement.setString(1, computer.getName());
@@ -143,12 +94,12 @@ public class ComputerDAOImpl implements ComputerDAO {
 				statement.setNull(2, java.sql.Types.BIGINT);
 			
 			if(computer.getIntroduced() != null)
-				statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTime()));
+				statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
 			else
 				statement.setNull(3, java.sql.Types.DATE);
 			
 			if(computer.getDiscontinued() != null)
-				statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTime()));
+				statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
 			else
 				statement.setNull(4, java.sql.Types.DATE);
 			
@@ -168,38 +119,49 @@ public class ComputerDAOImpl implements ComputerDAO {
 		}
 	}
 	
+	/**
+	 * Updates the computer in DB.
+	 * The id needs to be set.
+	 */
 	public void update(Computer computer) {
-
-		if(handler == null) {
-			handler = DBHandler.getInstance();
-		}
 		
+		if(computer.getId() == null) {
+			log.error("Trying to update a computer without id : " + computer.toString());
+			return;
+		}
+
 		Connection conn = null;
 
 		try {
-			conn = handler.getConn();
 			
-			String query = "UPDATE computer SET name = ?, company_id = ?, introduced = ?, discontinued = ? "
-					+ "WHERE id = " + computer.getId();
+			// Get a connection
+			conn = DAOFactory.INSTANCE.getConn();
 			
-			PreparedStatement statement = conn.prepareStatement(query);
+			// Build query
+			StringBuilder query = new StringBuilder("UPDATE computer SET name = ?, company_id = ?, introduced = ?, discontinued = ? ");
+			query.append("WHERE id = ").append(computer.getId());
+			
+			// Create prepared statement
+			PreparedStatement statement = conn.prepareStatement(query.toString());
 			statement.setString(1, computer.getName());
 			
+			// Set variables
 			if(computer.getCompany() != null)
 				statement.setLong(2, computer.getCompany().getId());
 			else
 				statement.setNull(2, java.sql.Types.BIGINT);
 			
 			if(computer.getIntroduced() != null)
-				statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTime()));
+				statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
 			else
 				statement.setNull(3, java.sql.Types.DATE);
 			
 			if(computer.getDiscontinued() != null)
-				statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTime()));
+				statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
 			else
 				statement.setNull(4, java.sql.Types.DATE);
 			
+			// Execute query
 			statement.executeUpdate();
 			
 		} catch (SQLException e1) {
@@ -216,17 +178,23 @@ public class ComputerDAOImpl implements ComputerDAO {
 		}
 	}
 	
+	/**
+	 * Delete computer with id set as parameter
+	 * @param id the id
+	 */
 	public void delete(int id) {
 		
-		if(handler == null) {
-			handler = DBHandler.getInstance();
-		}
-		
-		Connection conn = handler.getConn();
+		Connection conn = DAOFactory.INSTANCE.getConn();
 			
 		String query = "DELETE FROM computer WHERE id = " + id;
+
+		try {
+			Statement statement = conn.createStatement();
+			statement.executeUpdate(query.toString());
+		} catch (SQLException e1) {
+			log.error("Error while executing query : " + query, e1);
+		}
 		
-		handler.executeQuery(conn, query);
 		try {
 			if (conn != null)
 				conn.close();
@@ -236,46 +204,55 @@ public class ComputerDAOImpl implements ComputerDAO {
 		}
 	}
 
-	public ArrayList<Computer> search(String search, int offset, int max, String orderBy, String dir) {
-		if(handler == null) {
-			handler = DBHandler.getInstance();
-		}
+	/**
+	 * {@inheritDoc}
+	 */
+	public void fill(Page page) {
 
-		ArrayList<Computer> computers = new ArrayList<Computer>();
+		List<Computer> computers = new ArrayList<Computer>();
 		ResultSet rs = null;
 		Connection conn = null;
 
 		try {
-			conn = handler.getConn();
-
-
-			int orderCol = 1;
-			if(orderBy != null) {
-				if(orderBy.equals("name"))
-					orderCol = 2;
-				else if(orderBy.equals("intro"))
-					orderCol = 3;
-				else if(orderBy.equals("disco"))
-					orderCol = 4;
-				else if(orderBy.equals("company"))
-					orderCol = 6;
+			
+			// Get a connection to DB
+			conn = DAOFactory.INSTANCE.getConn();
+			
+			// Build query, depends on the page parameters
+			StringBuilder query = new StringBuilder("SELECT cr.id, cr.name, cr.introduced, cr.discontinued, cy.id, cy.name ");
+			query.append("FROM computer AS cr ");
+			query.append("LEFT JOIN company AS cy ON cr.company_id = cy.id ");
+			
+				// Search parameter
+			String search = page.getSearch();
+			
+			if(search != null) {
+				query.append("WHERE cr.name LIKE '%").append(search).append("%' ");
+				query.append("OR cy.name LIKE '%").append(search).append("%' ");
 			}
 			
-			String dirString = "ASC";
-			if(dir != null) {
-				dir = dir.toLowerCase();
-				if(dir.equals("desc"))
-					dirString = "DESC";
-			}
+				// Order By parameter
+			OrderByColumn orderBy = page.getOrderBy();
+			if(orderBy != null)
+				query.append("ORDER BY ").append(orderBy.getColNumber()).append(" ").append(orderBy.getDir()).append(" ");
 			
-			String query = "SELECT cr.id, cr.name, cr.introduced, cr.discontinued, cy.id, cy.name "
-					+ "FROM computer AS cr "
-					+ "LEFT JOIN company AS cy ON cr.company_id = cy.id "
-					+ "WHERE cr.name LIKE '%" + search + "%' "
-					+ "OR cy.name LIKE '%" + search + "%' "
-					+ "ORDER BY " + orderCol + " " + dirString + " "
-					+ "LIMIT " + offset + ", " + max;
-			rs = handler.executeQueryRS(conn, query);
+				// Number of rows parameter
+			Integer nbRows = page.getNbRows();
+			if(nbRows != null) {
+				query.append("LIMIT ");
+				Integer currPage = page.getCurrPage();
+				if(currPage != null) {
+					int offset = (currPage - 1) * nbRows;
+					query.append(offset).append(", ");
+				}
+				query.append(nbRows);
+			}
+
+			// Create statement
+			Statement statement = conn.createStatement();
+			
+			// Execute statement
+			rs = statement.executeQuery(query.toString());
 
 			// Traitement a faire ici sur le resultset
 			while(rs.next())
@@ -295,34 +272,43 @@ public class ComputerDAOImpl implements ComputerDAO {
 				e.printStackTrace();
 			}
 		}
-		return computers;
+		
+		// Store the resulting list of computers in the page
+		page.setList(computers);
 	}
 	
+	/**
+	 * Counts the number of computers matching the search criteria.
+	 * If search is empty, counts all the computers
+	 */
 	public int count(String search) {
-		if(handler == null) {
-			handler = DBHandler.getInstance();
-		}
 
 		ResultSet rs = null;
 		Connection conn = null;
 		Long count = null;
 
 		try {
-			conn = handler.getConn();
+			
+			// Get a connection to the DB
+			conn = DAOFactory.INSTANCE.getConn();
 
-			String query = null;
-			
+			// Build query
+			StringBuilder query = new StringBuilder();
 			if(search == null) {
-				query = "SELECT COUNT(id) FROM computer";
+				query.append("SELECT COUNT(id) FROM computer");
 			} else {
-				query = "SELECT COUNT(cr.id) "
-					+ "FROM computer AS cr "
-					+ "LEFT JOIN company AS cy ON cr.company_id = cy.id "
-					+ "WHERE cr.name LIKE '%" + search + "%' "
-					+ "OR cy.name LIKE '%" + search + "%'";
+				query.append("SELECT COUNT(cr.id) ");
+				query.append("FROM computer AS cr ");
+				query.append("LEFT JOIN company AS cy ON cr.company_id = cy.id ");
+				query.append("WHERE cr.name LIKE '%").append(search).append("%' ");
+				query.append("OR cy.name LIKE '%").append(search).append("%'");
 			}
+
+			// Create statement
+			Statement statement = conn.createStatement();
 			
-			rs = handler.executeQueryRS(conn, query);
+			// Execute query
+			rs = statement.executeQuery(query.toString());
 
 			// Traitement a faire ici sur le resultsets
 			if(rs.next())
@@ -345,6 +331,11 @@ public class ComputerDAOImpl implements ComputerDAO {
 		return (count == null) ? 0 : count.intValue();
 	}
 
+	/**
+	 * Map a resultset to a computer
+	 * @param resultSet the resultset
+	 * @return the computer
+	 */
 	private Computer mapComputer( ResultSet resultSet ) {
 		Computer computer = new Computer();
 

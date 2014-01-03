@@ -1,10 +1,7 @@
 package com.formation.computerdb.servlet;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,22 +14,30 @@ import org.slf4j.LoggerFactory;
 
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
+import com.formation.computerdb.dto.ComputerDto;
+import com.formation.computerdb.mapper.ComputerMapper;
 import com.formation.computerdb.service.DataService;
 import com.formation.computerdb.validator.ComputerValidator;
 
+/**
+ * Servlet called when the user wants to add a computer in DB
+ * @author F. Miglianico
+ *
+ */
 @WebServlet("/addComputer")
 public class AddComputerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private static Logger log = LoggerFactory.getLogger(AddComputerServlet.class);
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
 		
+		// Get Companies
 		DataService ds = DataService.getInstance();
 		
-		ArrayList<Company> companies = ds.getAllCompanies();
+		List<Company> companies = ds.getAllCompanies();
 
+		// Send companies to jsp
 		request.setAttribute("companies", companies);
 		request.getRequestDispatcher( "WEB-INF/addComputer.jsp" ).forward(request, response);
 
@@ -41,37 +46,40 @@ public class AddComputerServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
 		
-		
-		String name = request.getParameter("name");
-		String introduced = request.getParameter("introduced");
-		String discontinued = request.getParameter("discontinued");
-		String companyId = request.getParameter("company");
-		
-		if(!ComputerValidator.isValid(name, introduced, discontinued))
-			response.sendRedirect("dashboard");
-		
-		Date introducedDate = null, discontinuedDate = null;
-		
-		try {
+		// Creates DTO from parameters set by user
+		ComputerDto cdto = new ComputerDto();
+		cdto.setName(request.getParameter("name"));
+		cdto.setIntroduced(request.getParameter("introduced"));
+		cdto.setDiscontinued(request.getParameter("discontinued"));
+		cdto.setCompanyId(Long.valueOf(request.getParameter("company")));
 
-			introducedDate = sdf.parse(introduced);
-			discontinuedDate = sdf.parse(discontinued);
-		} catch (ParseException e) {
-			log.error("Warning : " + e.getMessage());
+		if(cdto.getCompanyId() == 0)
+			cdto.setCompanyId(null);
+		
+		// Validate computer - error code returned if not valid
+		int retCode = ComputerValidator.isValid(cdto);
+		if(retCode != 0) {
+			request.setAttribute("retCode", retCode);
+			request.setAttribute("cdto", cdto);
+			
+			DataService ds = DataService.getInstance();
+			List<Company> companies = ds.getAllCompanies();
+			request.setAttribute("companies", companies);
+			
+			request.getRequestDispatcher("WEB-INF/addComputer.jsp").forward(request, response);
+			return;
 		}
-
-		Long id = Long.valueOf(companyId);
 		
+		// ComputerDto is valid, conversion to Computer
+		Computer computer = ComputerMapper.fromDto(cdto);
+		
+		// Creation in DB
 		DataService ds = DataService.getInstance();
-		
-		Company company = ds.getCompany(id.intValue());
-		
-		Computer computer = new Computer(null, name, company, introducedDate, discontinuedDate);
-
 		ds.createComputer(computer);
+		
+		log.info(new StringBuilder("Creation of computer \"").append(computer.getName()).append("\" successful").toString());
 
-		response.sendRedirect("dashboard");
-		//request.getRequestDispatcher( "WEB-INF/dashboard.jsp").forward(request, response);
+		response.sendRedirect("dashboard?message=creationOK");
 
 	}
 }

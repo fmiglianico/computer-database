@@ -1,7 +1,8 @@
 package com.formation.computerdb.domain;
 
 /**
- * @author fmiglianico
+ * Class representing a Company
+ * @author F. Miglianico
  *
  */
 public class Company {
