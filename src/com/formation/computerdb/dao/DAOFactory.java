@@ -21,7 +21,7 @@ public enum DAOFactory {
 	 */
 	INSTANCE;
 	
-	private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
+	private Logger log = LoggerFactory.getLogger(DAOFactory.class);
 	
 	private BoneCP connectionPool = null;
 
@@ -35,6 +35,7 @@ public enum DAOFactory {
 	// The DAOs
 	private ComputerDAO computerDAO;
 	private CompanyDAO companyDAO;
+	private DBLogDAO dbLogDAO;
 	
 	/**
 	 * Initializes the connection and the DAOs
@@ -50,20 +51,19 @@ public enum DAOFactory {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 		} catch (Exception e) {
-			System.err.println("Error while loading JDBC driver : " + e.getMessage());
-			e.printStackTrace();
+			log.error("Error while loading JDBC driver : " + e.getMessage(), e);
 		}
 		
 		try {
 			connectionPool = new BoneCP(config);
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
-			System.err.println("Error while init of connection pool : " + e1.getMessage());
-			e1.printStackTrace();
+			log.error("Error while init of connection pool : " + e1.getMessage(), e1);
 		}
 		
 		computerDAO = new ComputerDAOImpl();
 		companyDAO = new CompanyDAOImpl();
+		dbLogDAO = new DBLogDAOImpl();
 	}
 	
 	/**
@@ -84,6 +84,14 @@ public enum DAOFactory {
 	
 	/**
 	 * 
+	 * @return the companyDAO
+	 */
+	public DBLogDAO getDBLogDAO() {
+		return dbLogDAO;
+	}
+	
+	/**
+	 * 
 	 * @return a connection to the DB
 	 */
 	public Connection getConn() {
@@ -95,7 +103,7 @@ public enum DAOFactory {
 			log.error("Error while trying to fetch a connection : " + e1.getMessage());
 			e1.printStackTrace();
 		}
-		log.debug("getConn()");
+		//log.debug("getConn()");
 		return conn;
 	}
 }

@@ -32,15 +32,12 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Get a computer
 	 * @param id the id
 	 */
-	public Computer get(int id) {
+	public Computer get(int id, Connection conn) {
 
 		Computer computer = null;
 		ResultSet rs = null;
-		Connection conn = null;
 
 		try {
-			// Get the connection
-			conn = DAOFactory.INSTANCE.getConn();
 
 			// Build the query
 			StringBuilder query = new StringBuilder("SELECT cr.id, cr.name, cr.introduced, cr.discontinued, cy.id, cy.name ");
@@ -62,9 +59,6 @@ public class ComputerDAOImpl implements ComputerDAO {
 			try {
 				if (rs != null)
 					rs.close();
-
-				if (conn != null)
-					conn.close();
 			} catch (SQLException e) {
 				log.error("Error in finally: " + e.getMessage());
 				e.printStackTrace();
@@ -77,16 +71,13 @@ public class ComputerDAOImpl implements ComputerDAO {
 	/**
 	 * Create a computer in DB
 	 */
-	public void create(Computer computer) {
-		
-		Connection conn = null;
+	public void create(Computer computer, Connection conn) {
 
 		try {
-			conn = DAOFactory.INSTANCE.getConn();
 			
 			String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
 			
-			PreparedStatement statement = conn.prepareStatement(query);
+			PreparedStatement statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, computer.getName());
 			if(computer.getCompany() != null)
 				statement.setLong(2, computer.getCompany().getId());
@@ -105,17 +96,21 @@ public class ComputerDAOImpl implements ComputerDAO {
 			
 			statement.executeUpdate();
 			
+			ResultSet rs = statement.getGeneratedKeys();
+			Long id = null;
+			
+			if (rs.next()) {
+		        id = rs.getLong(1);
+		        computer.setId(id);
+		    } else {
+		    	log.error("Could not retrieve id after creating a computer");
+		    }
+		    rs.close();
+		    rs = null;
+		    
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		} finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				log.error("Error in finally: " + e.getMessage());
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -123,19 +118,14 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Updates the computer in DB.
 	 * The id needs to be set.
 	 */
-	public void update(Computer computer) {
+	public void update(Computer computer, Connection conn) {
 		
 		if(computer.getId() == null) {
 			log.error("Trying to update a computer without id : " + computer.toString());
 			return;
 		}
 
-		Connection conn = null;
-
 		try {
-			
-			// Get a connection
-			conn = DAOFactory.INSTANCE.getConn();
 			
 			// Build query
 			StringBuilder query = new StringBuilder("UPDATE computer SET name = ?, company_id = ?, introduced = ?, discontinued = ? ");
@@ -167,14 +157,6 @@ public class ComputerDAOImpl implements ComputerDAO {
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		} finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				log.error("Error in finally: " + e.getMessage());
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -182,9 +164,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Delete computer with id set as parameter
 	 * @param id the id
 	 */
-	public void delete(int id) {
-		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+	public void delete(int id, Connection conn) {
 			
 		String query = "DELETE FROM computer WHERE id = " + id;
 
@@ -194,29 +174,17 @@ public class ComputerDAOImpl implements ComputerDAO {
 		} catch (SQLException e1) {
 			log.error("Error while executing query : " + query, e1);
 		}
-		
-		try {
-			if (conn != null)
-				conn.close();
-		} catch (SQLException e) {
-			log.error("Error while closing connection : " + e.getMessage());
-			e.printStackTrace();
-		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void fill(Page page) {
+	public void fill(Page page, Connection conn) {
 
 		List<Computer> computers = new ArrayList<Computer>();
 		ResultSet rs = null;
-		Connection conn = null;
 
 		try {
-			
-			// Get a connection to DB
-			conn = DAOFactory.INSTANCE.getConn();
 			
 			// Build query, depends on the page parameters
 			StringBuilder query = new StringBuilder("SELECT cr.id, cr.name, cr.introduced, cr.discontinued, cy.id, cy.name ");
@@ -264,9 +232,6 @@ public class ComputerDAOImpl implements ComputerDAO {
 			try {
 				if (rs != null)
 					rs.close();
-
-				if (conn != null)
-					conn.close();
 			} catch (SQLException e) {
 				log.error("Error in finally: " + e.getMessage());
 				e.printStackTrace();
@@ -281,16 +246,12 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Counts the number of computers matching the search criteria.
 	 * If search is empty, counts all the computers
 	 */
-	public int count(String search) {
+	public int count(String search, Connection conn) {
 
 		ResultSet rs = null;
-		Connection conn = null;
 		Long count = null;
 
 		try {
-			
-			// Get a connection to the DB
-			conn = DAOFactory.INSTANCE.getConn();
 
 			// Build query
 			StringBuilder query = new StringBuilder();
@@ -320,9 +281,6 @@ public class ComputerDAOImpl implements ComputerDAO {
 			try {
 				if (rs != null)
 					rs.close();
-
-				if (conn != null)
-					conn.close();
 			} catch (SQLException e) {
 				log.error("Error in finally: " + e.getMessage());
 				e.printStackTrace();

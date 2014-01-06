@@ -1,5 +1,7 @@
 package com.formation.computerdb.dao;
 
+import java.sql.Connection;
+
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.domain.Page;
 
@@ -9,17 +11,18 @@ import com.formation.computerdb.domain.Page;
  */
 public interface ComputerDAO {
 	
-	public Computer get(int id);
+	public Computer get(int id, Connection conn);
 	/**
 	 * Fills the list of computers in the page, 
 	 * corresponding to the parameters set in the page
 	 * @param page the page
+	 * @param conn TODO
 	 */
-	public void fill(Page page);
+	public void fill(Page page, Connection conn);
 	
-	public void create(Computer computer);
-	public void update(Computer computer);
-	public void delete(int id);
+	public void create(Computer computer, Connection conn);
+	public void update(Computer computer, Connection conn);
+	public void delete(int id, Connection conn);
 	
-	public int count(String search);
+	public int count(String search, Connection conn);
 }
