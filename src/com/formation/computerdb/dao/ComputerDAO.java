@@ -1,6 +1,7 @@
 package com.formation.computerdb.dao;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.domain.Page;
@@ -20,9 +21,9 @@ public interface ComputerDAO {
 	 */
 	public void fill(Page page, Connection conn);
 	
-	public void create(Computer computer, Connection conn);
-	public void update(Computer computer, Connection conn);
-	public void delete(int id, Connection conn);
+	public void create(Computer computer, Connection conn) throws SQLException;
+	public void update(Computer computer, Connection conn) throws SQLException;
+	public void delete(int id, Connection conn) throws SQLException;
 	
 	public int count(String search, Connection conn);
 }

@@ -39,27 +39,20 @@ public class DBLogDAOImpl implements DBLogDAO {
 		return dbLog;
 	}
 	
-	public void create(DBLog dbLog, Connection conn) {
-		try {
-			
-			String query = "INSERT INTO db_log (action, date, description) VALUES (?, ?, ?)";
-			
-			PreparedStatement statement = conn.prepareStatement(query);
-			statement.setString(1, dbLog.getActionType().toString());
-			
-			if(dbLog.getDate() != null)
-				statement.setTimestamp(2, new java.sql.Timestamp(dbLog.getDate().getTime()));
-			else
-				statement.setNull(2, java.sql.Types.DATE);
-			
-			statement.setString(3, dbLog.getDescription());
-			
-			statement.executeUpdate();
-			
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+	public void create(DBLog dbLog, Connection conn) throws SQLException {
+		String query = "INSERT INTO db_log (action, date, description) VALUES (?, ?, ?)";
+		
+		PreparedStatement statement = conn.prepareStatement(query);
+		statement.setString(1, dbLog.getActionType().toString());
+		
+		if(dbLog.getDate() != null)
+			statement.setTimestamp(2, new java.sql.Timestamp(dbLog.getDate().getTime()));
+		else
+			statement.setNull(2, java.sql.Types.DATE);
+		
+		statement.setString(3, dbLog.getDescription());
+		
+		statement.executeUpdate();
 	}
 	
 	/**

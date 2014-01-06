@@ -91,10 +91,14 @@ public class ComputerServlet extends HttpServlet {
 			} else if(message.equals("creationNOK")){
 				request.setAttribute("messageHeader", "Error!");
 				request.setAttribute("message", "An error occured while trying to create the computer. Please try again later.");
-				request.setAttribute("status", "error");
+				request.setAttribute("status", "danger");
 			} else if(message.equals("editNOK")){
 				request.setAttribute("messageHeader", "Error!");
 				request.setAttribute("message", "An error occured while trying to edit the computer. Please try again later.");
+				request.setAttribute("status", "danger");
+			} else if(message.equals("deleteNOK")){
+				request.setAttribute("messageHeader", "Error!");
+				request.setAttribute("message", "An error occured while trying to delete the computer. Please try again later.");
 				request.setAttribute("status", "danger");
 			}
 		}

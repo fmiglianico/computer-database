@@ -71,109 +71,91 @@ public class ComputerDAOImpl implements ComputerDAO {
 	/**
 	 * Create a computer in DB
 	 */
-	public void create(Computer computer, Connection conn) {
+	public void create(Computer computer, Connection conn) throws SQLException{
 
-		try {
-			
-			String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
-			
-			PreparedStatement statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-			statement.setString(1, computer.getName());
-			if(computer.getCompany() != null)
-				statement.setLong(2, computer.getCompany().getId());
-			else
-				statement.setNull(2, java.sql.Types.BIGINT);
-			
-			if(computer.getIntroduced() != null)
-				statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
-			else
-				statement.setNull(3, java.sql.Types.DATE);
-			
-			if(computer.getDiscontinued() != null)
-				statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
-			else
-				statement.setNull(4, java.sql.Types.DATE);
-			
-			statement.executeUpdate();
-			
-			ResultSet rs = statement.getGeneratedKeys();
-			Long id = null;
-			
-			if (rs.next()) {
-		        id = rs.getLong(1);
-		        computer.setId(id);
-		    } else {
-		    	log.error("Could not retrieve id after creating a computer");
-		    }
-		    rs.close();
-		    rs = null;
-		    
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
+		
+		PreparedStatement statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+		statement.setString(1, computer.getName());
+		if(computer.getCompany() != null)
+			statement.setLong(2, computer.getCompany().getId());
+		else
+			statement.setNull(2, java.sql.Types.BIGINT);
+		
+		if(computer.getIntroduced() != null)
+			statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
+		else
+			statement.setNull(3, java.sql.Types.DATE);
+		
+		if(computer.getDiscontinued() != null)
+			statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
+		else
+			statement.setNull(4, java.sql.Types.DATE);
+		
+		statement.executeUpdate();
+		
+		ResultSet rs = statement.getGeneratedKeys();
+		Long id = null;
+		
+		if (rs.next()) {
+	        id = rs.getLong(1);
+	        computer.setId(id);
+	    } else {
+	    	log.error("Could not retrieve id after creating a computer");
+	    }
+	    rs.close();
+	    rs = null;
 	}
 	
 	/**
 	 * Updates the computer in DB.
 	 * The id needs to be set.
 	 */
-	public void update(Computer computer, Connection conn) {
+	public void update(Computer computer, Connection conn) throws SQLException {
 		
 		if(computer.getId() == null) {
 			log.error("Trying to update a computer without id : " + computer.toString());
 			return;
 		}
-
-		try {
 			
-			// Build query
-			StringBuilder query = new StringBuilder("UPDATE computer SET name = ?, company_id = ?, introduced = ?, discontinued = ? ");
-			query.append("WHERE id = ").append(computer.getId());
-			
-			// Create prepared statement
-			PreparedStatement statement = conn.prepareStatement(query.toString());
-			statement.setString(1, computer.getName());
-			
-			// Set variables
-			if(computer.getCompany() != null)
-				statement.setLong(2, computer.getCompany().getId());
-			else
-				statement.setNull(2, java.sql.Types.BIGINT);
-			
-			if(computer.getIntroduced() != null)
-				statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
-			else
-				statement.setNull(3, java.sql.Types.DATE);
-			
-			if(computer.getDiscontinued() != null)
-				statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
-			else
-				statement.setNull(4, java.sql.Types.DATE);
-			
-			// Execute query
-			statement.executeUpdate();
-			
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		// Build query
+		StringBuilder query = new StringBuilder("UPDATE computer SET name = ?, company_id = ?, introduced = ?, discontinued = ? ");
+		query.append("WHERE id = ").append(computer.getId());
+		
+		// Create prepared statement
+		PreparedStatement statement = conn.prepareStatement(query.toString());
+		statement.setString(1, computer.getName());
+		
+		// Set variables
+		if(computer.getCompany() != null)
+			statement.setLong(2, computer.getCompany().getId());
+		else
+			statement.setNull(2, java.sql.Types.BIGINT);
+		
+		if(computer.getIntroduced() != null)
+			statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
+		else
+			statement.setNull(3, java.sql.Types.DATE);
+		
+		if(computer.getDiscontinued() != null)
+			statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
+		else
+			statement.setNull(4, java.sql.Types.DATE);
+		
+		// Execute query
+		statement.executeUpdate();
 	}
 	
 	/**
 	 * Delete computer with id set as parameter
 	 * @param id the id
 	 */
-	public void delete(int id, Connection conn) {
+	public void delete(int id, Connection conn) throws SQLException {
 			
 		String query = "DELETE FROM computer WHERE id = " + id;
 
-		try {
-			Statement statement = conn.createStatement();
-			statement.executeUpdate(query.toString());
-		} catch (SQLException e1) {
-			log.error("Error while executing query : " + query, e1);
-		}
+		Statement statement = conn.createStatement();
+		statement.executeUpdate(query.toString());
 	}
 
 	/**

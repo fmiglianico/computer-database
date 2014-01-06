@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.formation.computerdb.common.RC;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.dto.ComputerDto;
@@ -88,7 +89,12 @@ public class EditComputerServlet extends HttpServlet {
 		
 		DataService ds = DataService.getInstance();
 
-		ds.updateComputer(computer);
+		RC rc = ds.updateComputer(computer);
+		
+		if(rc == RC.FAILED) {
+			response.sendRedirect("dashboard?message=editNOK");
+			return;
+		}
 		
 		log.info(new StringBuilder("Edition of computer \"").append(computer.getName()).append("\" successful").toString());
 

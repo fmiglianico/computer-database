@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.formation.computerdb.common.RC;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.dto.ComputerDto;
@@ -75,7 +76,12 @@ public class AddComputerServlet extends HttpServlet {
 		
 		// Creation in DB
 		DataService ds = DataService.getInstance();
-		ds.createComputer(computer);
+		RC rc = ds.createComputer(computer);
+		
+		if(rc == RC.FAILED) {
+			response.sendRedirect("dashboard?message=creationNOK");
+			return;
+		}
 		
 		log.info(new StringBuilder("Creation of computer \"").append(computer.getName()).append("\" successful").toString());
 

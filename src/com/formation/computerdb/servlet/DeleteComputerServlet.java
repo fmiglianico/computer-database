@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.formation.computerdb.common.RC;
 import com.formation.computerdb.service.DataService;
 
 /**
@@ -31,7 +32,12 @@ public class DeleteComputerServlet extends HttpServlet {
 		
 		DataService ds = DataService.getInstance();
 		
-		ds.deleteComputer(id.intValue());
+		RC rc = ds.deleteComputer(id.intValue());
+		
+		if(rc == RC.FAILED) {
+			response.sendRedirect("dashboard?message=deleteNOK");
+			return;
+		}
 
 		response.sendRedirect("dashboard?message=deleteOK");
 

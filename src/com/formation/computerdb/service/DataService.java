@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.formation.computerdb.common.DBLogActionType;
+import com.formation.computerdb.common.RC;
 import com.formation.computerdb.dao.CompanyDAO;
 import com.formation.computerdb.dao.ComputerDAO;
 import com.formation.computerdb.dao.DAOFactory;
@@ -43,7 +44,7 @@ public class DataService {
 		return INSTANCE;
 	}
 	
-	private Connection initTransaction() {
+	private Connection init() {
 		Connection conn = DAOFactory.INSTANCE.getConn();
 		try {
 			conn.setAutoCommit(false);
@@ -53,7 +54,7 @@ public class DataService {
 		return conn;
 	}
 	
-	private void commitTransaction(Connection conn) {
+	private void commit(Connection conn) {
 		if(conn == null) {
 			log.error("Connection is null");
 		}
@@ -76,75 +77,114 @@ public class DataService {
 		}
 	}
 	
+	private void rollback(Connection conn) {
+		if(conn == null) {
+			log.error("Connection is null");
+		}
+		
+		try {
+			conn.rollback();
+		} catch (SQLException e) {
+			log.error("Cannot rollback transaction");
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				log.error("Cannot close connection");
+			}
+		}
+	}
+	
 	public Computer getComputer(int id) {
-		Connection conn = initTransaction();
+		Connection conn = init();
 		Computer computer = computerDAO.get(id, conn);
-		commitTransaction(conn);
+		commit(conn);
 		
 		return computer;
 	}
 	
-	public void createComputer(Computer computer) {
-		Connection conn = initTransaction();
+	public RC createComputer(Computer computer) {
+		Connection conn = init();
 		
-		computerDAO.create(computer, conn);
-		DBLog dbLog;
-		if(computer.getId() != null)
-			dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, Calendar.getInstance().getTime(), computer.getId().toString());
-		else
-			dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, Calendar.getInstance().getTime(), "Unknown ID");
+		try {
+			computerDAO.create(computer, conn);
+			DBLog dbLog;
+			if(computer.getId() != null)
+				dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, Calendar.getInstance().getTime(), computer.getId().toString());
+			else
+				dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, Calendar.getInstance().getTime(), "Unknown ID");
+			
+			dbLogDAO.create(dbLog, conn);
+		} catch (SQLException e) {
+			rollback(conn);
+			log.error("An error occured while trying to create a computer. Transaction rollbacked.", e);
+			return RC.FAILED;
+		}
 		
-		dbLogDAO.create(dbLog, conn);
-		
-		commitTransaction(conn);
+		commit(conn);
+		return RC.OK;
 	}
 	
-	public void updateComputer(Computer computer) {
-		Connection conn = initTransaction();
+	public RC updateComputer(Computer computer) {
+		Connection conn = init();
 		
 		DBLog dbLog = new DBLog(DBLogActionType.COMPUTER_UPDATED, Calendar.getInstance().getTime(), computer.getId().toString());
-		computerDAO.update(computer, conn);
-		dbLogDAO.create(dbLog, conn);
+		try {
+			computerDAO.update(computer, conn);
+			dbLogDAO.create(dbLog, conn);
+		} catch (SQLException e) {
+			rollback(conn);
+			log.error("An error occured while trying to update a computer. Transaction rollbacked.", e);
+			return RC.FAILED;
+		}
 		
-		commitTransaction(conn);
+		commit(conn);
+		return RC.OK;
 	}
 	
-	public void deleteComputer(int id) {
-		Connection conn = initTransaction();
+	public RC deleteComputer(int id) {
+		Connection conn = init();
 		
 		DBLog dbLog = new DBLog(DBLogActionType.COMPUTER_DELETED, Calendar.getInstance().getTime(), "" + id);
-		computerDAO.delete(id, conn);
-		dbLogDAO.create(dbLog, conn);
+		try {
+			computerDAO.delete(id, conn);
+			dbLogDAO.create(dbLog, conn);
+		} catch (SQLException e) {
+			rollback(conn);
+			log.error("An error occured while trying to delete a computer. Transaction rollbacked.", e);
+			return RC.FAILED;
+		}
 		
-		commitTransaction(conn);
+		commit(conn);
+		return RC.OK;
 	}
 	
 	public void fill(Page page) {
-		Connection conn = initTransaction();
+		Connection conn = init();
 		computerDAO.fill(page, conn);
-		commitTransaction(conn);
+		commit(conn);
 	}
 	
 	public int countComputers(String search) {
-		Connection conn = initTransaction();
+		Connection conn = init();
 		int count = computerDAO.count(search, conn);
-		commitTransaction(conn);
+		commit(conn);
 		
 		return count;
 	}
 	
 	public List<Company> getAllCompanies() {
-		Connection conn = initTransaction();
+		Connection conn = init();
 		List<Company> companies = companyDAO.getAll(conn);
-		commitTransaction(conn);
+		commit(conn);
 		
 		return companies;
 	}
 	
 	public Company getCompany(int id) {
-		Connection conn = initTransaction();
+		Connection conn = init();
 		Company company = companyDAO.get(id, conn);
-		commitTransaction(conn);
+		commit(conn);
 		
 		return company;
 	}
