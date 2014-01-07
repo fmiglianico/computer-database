@@ -22,7 +22,9 @@ public class CompanyDAOImpl implements CompanyDAO {
 	/**
 	 * Get all the companies in DB
 	 */
-	public List<Company> getAll(Connection conn) {
+	public List<Company> getAll() {
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 
 		List<Company> companies = new ArrayList<Company>();
 		ResultSet rs = null;
@@ -56,7 +58,9 @@ public class CompanyDAOImpl implements CompanyDAO {
 	 * get a the company with the id given as parameter
 	 * @param id the id
 	 */
-	public Company get(int id, Connection conn) {
+	public Company get(int id) {
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 
 		Company company = null;
 		ResultSet rs = null;

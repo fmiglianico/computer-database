@@ -9,10 +9,22 @@ import java.sql.Statement;
 import com.formation.computerdb.common.DBLogActionType;
 import com.formation.computerdb.domain.DBLog;
 
+/**
+ * Implementation of DBLogDAO
+ * Log user actions in DB in the db_log table
+ * @author F. Miglianico
+ *
+ */
 public class DBLogDAOImpl implements DBLogDAO {
-	public DBLog get(int id, Connection conn) {
+	
+	/**
+	 * Get a log
+	 */
+	public DBLog get(int id) {
 		DBLog dbLog = null;
 		ResultSet rs = null;
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 
 		try {
 			StringBuilder query = new StringBuilder("SELECT d.action, d.date, d.description FROM db_log AS d WHERE d.id = ").append(id);
@@ -39,7 +51,13 @@ public class DBLogDAOImpl implements DBLogDAO {
 		return dbLog;
 	}
 	
-	public void create(DBLog dbLog, Connection conn) throws SQLException {
+	/**
+	 * Persist a log in DB
+	 */
+	public void create(DBLog dbLog) throws SQLException {
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
+		
 		String query = "INSERT INTO db_log (action, date, description) VALUES (?, ?, ?)";
 		
 		PreparedStatement statement = conn.prepareStatement(query);

@@ -32,10 +32,12 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Get a computer
 	 * @param id the id
 	 */
-	public Computer get(int id, Connection conn) {
+	public Computer get(int id) {
 
 		Computer computer = null;
 		ResultSet rs = null;
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 
 		try {
 
@@ -71,7 +73,9 @@ public class ComputerDAOImpl implements ComputerDAO {
 	/**
 	 * Create a computer in DB
 	 */
-	public void create(Computer computer, Connection conn) throws SQLException{
+	public void create(Computer computer) throws SQLException{
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 
 		String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
 		
@@ -111,7 +115,9 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Updates the computer in DB.
 	 * The id needs to be set.
 	 */
-	public void update(Computer computer, Connection conn) throws SQLException {
+	public void update(Computer computer) throws SQLException {
+
+		Connection conn = DAOFactory.INSTANCE.getConn();
 		
 		if(computer.getId() == null) {
 			log.error("Trying to update a computer without id : " + computer.toString());
@@ -150,7 +156,9 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Delete computer with id set as parameter
 	 * @param id the id
 	 */
-	public void delete(int id, Connection conn) throws SQLException {
+	public void delete(int id) throws SQLException {
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 			
 		String query = "DELETE FROM computer WHERE id = " + id;
 
@@ -161,7 +169,9 @@ public class ComputerDAOImpl implements ComputerDAO {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void fill(Page page, Connection conn) {
+	public void fill(Page page) {
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 
 		List<Computer> computers = new ArrayList<Computer>();
 		ResultSet rs = null;
@@ -228,10 +238,12 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * Counts the number of computers matching the search criteria.
 	 * If search is empty, counts all the computers
 	 */
-	public int count(String search, Connection conn) {
+	public int count(String search) {
 
 		ResultSet rs = null;
 		Long count = null;
+		
+		Connection conn = DAOFactory.INSTANCE.getConn();
 
 		try {
 

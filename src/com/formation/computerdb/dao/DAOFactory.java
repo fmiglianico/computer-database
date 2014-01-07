@@ -24,6 +24,7 @@ public enum DAOFactory {
 	private Logger log = LoggerFactory.getLogger(DAOFactory.class);
 	
 	private BoneCP connectionPool = null;
+	private static ThreadLocal<Connection> thConn = new ThreadLocal<Connection>();
 
 	//Static final attributes
 	private static final String JDBC_URL = "jdbc:mysql://127.0.0.1:3306/";
@@ -38,7 +39,7 @@ public enum DAOFactory {
 	private DBLogDAO dbLogDAO;
 	
 	/**
-	 * Initializes the connection and the DAOs
+	 * Initializes the connection pool and the DAOs
 	 */
 	private DAOFactory() {
 		
@@ -96,14 +97,71 @@ public enum DAOFactory {
 	 */
 	public Connection getConn() {
 		Connection conn = null;
+	
 		try {
 			conn = connectionPool.getConnection();
+			thConn.set(conn);
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			log.error("Error while trying to fetch a connection : " + e1.getMessage());
 			e1.printStackTrace();
 		}
+		
+		try {
+			conn.setAutoCommit(false);
+		} catch (SQLException e) {
+			log.error("Error while setting auto-commit to false : " + e.getMessage(), e);
+		}
 		//log.debug("getConn()");
 		return conn;
+	}
+	
+	/**
+	 * Commit a transaction in ThreadLocal connection
+	 */
+	public void commit() {
+		Connection conn = thConn.get();
+		if(conn == null) {
+			log.error("Connection is null");
+		}
+		
+		try {
+			conn.commit();
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+			} catch (SQLException e1) {
+				log.error("Cannot rollback transaction");
+			}
+			log.error("Cannot commit transaction");
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				log.error("Cannot close connection");
+			}
+		}
+	}
+
+	/**
+	 * Rollback a transaction in ThreadLocal connection
+	 */
+	public void rollback() {
+		Connection conn = thConn.get();
+		if(conn == null) {
+			log.error("Connection is null");
+		}
+		
+		try {
+			conn.rollback();
+		} catch (SQLException e) {
+			log.error("Cannot rollback transaction");
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				log.error("Cannot close connection");
+			}
+		}
 	}
 }
