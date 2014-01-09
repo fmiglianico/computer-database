@@ -70,30 +70,6 @@ public class DAOFactory {
 	
 	/**
 	 * 
-	 * @return the computerDAO
-	 */
-	public ComputerDAO getComputerDAO() {
-		return computerDAO;
-	}
-	
-	/**
-	 * 
-	 * @return the companyDAO
-	 */
-	public CompanyDAO getCompanyDAO() {
-		return companyDAO;
-	}
-	
-	/**
-	 * 
-	 * @return the companyDAO
-	 */
-	public DBLogDAO getDBLogDAO() {
-		return dbLogDAO;
-	}
-	
-	/**
-	 * 
 	 * @return a connection to the DB
 	 */
 	public Connection getConn() {

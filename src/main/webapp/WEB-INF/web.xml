@@ -5,7 +5,7 @@
 	id="WebApp_ID" version="3.0">
 	<display-name>computer-database</display-name>
 	<welcome-file-list>
-		<welcome-file>dashboard</welcome-file>
+		<welcome-file>dashboard/</welcome-file>
 	</welcome-file-list>
 
 	<servlet>
@@ -16,7 +16,7 @@
 
 	<servlet-mapping>
 		<servlet-name>spring</servlet-name>
-		<url-pattern>*.html</url-pattern>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
 	<context-param>
