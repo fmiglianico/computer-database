@@ -6,6 +6,8 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.dto.ComputerDto;
@@ -17,7 +19,11 @@ import com.formation.computerdb.util.ComputerDBCatalog;
  * @author F. Miglianico
  *
  */
+@Component
 public class ComputerMapper {
+	
+	@Autowired
+	private DataService ds;
 	
 	private final static Logger log = LoggerFactory.getLogger(ComputerMapper.class);
 	
@@ -45,7 +51,7 @@ public class ComputerMapper {
 	 * @param computer the computerDto
 	 * @return the computer
 	 */
-	public static Computer fromDto(ComputerDto cdto) {
+	public Computer fromDto(ComputerDto cdto) {
 		
 		Computer computer = new Computer();
 		
@@ -73,7 +79,7 @@ public class ComputerMapper {
 		
 		Long companyId = cdto.getCompanyId();
 		if(companyId != null)
-			computer.setCompany(DataService.getInstance().getCompany(companyId.intValue()));
+			computer.setCompany(ds.getCompany(companyId.intValue()));
 		
 		return computer;
 		

@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.formation.computerdb.common.ValidationError;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.dto.ComputerDto;
@@ -16,16 +19,20 @@ import com.formation.computerdb.util.ComputerDBCatalog;
  * @author F. Miglianico
  *
  */
+@Component
 public class ComputerValidator {
 
 	private static final SimpleDateFormat sdf = new SimpleDateFormat(ComputerDBCatalog.STORED_DATE_PATTERN.getValue());
 	
+	@Autowired
+	private DataService ds;
+	 
 	/**
 	 * Validates a ComputerDto
 	 * @param cdto the ComputerDto 
 	 * @return
 	 */
-	public static int isValid(ComputerDto cdto) {
+	public int isValid(ComputerDto cdto) {
 		
 		int retCode = 0;
 		
@@ -69,7 +76,7 @@ public class ComputerValidator {
 		// Verify that the company exists in DB
 		Long companyId = cdto.getCompanyId();
 		if(companyId != null) {
-			Company company = DataService.getInstance().getCompany(companyId.intValue());
+			Company company = ds.getCompany(companyId.intValue());
 			if(company == null)
 				retCode |= ValidationError.UNKNOWN_COMPANY.getFlag();
 		}

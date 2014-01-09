@@ -5,12 +5,12 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.formation.computerdb.common.RC;
 import com.formation.computerdb.domain.Company;
@@ -26,15 +26,30 @@ import com.formation.computerdb.validator.ComputerValidator;
  *
  */
 @WebServlet("/addComputer")
-public class AddComputerServlet extends HttpServlet {
+public class AddComputerServlet extends SpringInjectedServlet {
+	
 	private static final long serialVersionUID = 1L;
+	
 	private static Logger log = LoggerFactory.getLogger(AddComputerServlet.class);
+	
+	@Autowired
+	private DataService ds = null;
+
+	@Autowired
+	private ComputerMapper computerMapper = null;
+
+	@Autowired
+	private ComputerValidator computerValidator = null;
+
+	/**
+	 * @param ds the ds to set
+	 */
+	public void setComputerMapper(ComputerMapper computerMapper) {
+		this.computerMapper = computerMapper;
+	}
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
-		
-		// Get Companies
-		DataService ds = DataService.getInstance();
 		
 		List<Company> companies = ds.getAllCompanies();
 
@@ -58,12 +73,11 @@ public class AddComputerServlet extends HttpServlet {
 			cdto.setCompanyId(null);
 		
 		// Validate computer - error code returned if not valid
-		int retCode = ComputerValidator.isValid(cdto);
+		int retCode = computerValidator.isValid(cdto);
 		if(retCode != 0) {
 			request.setAttribute("retCode", retCode);
 			request.setAttribute("cdto", cdto);
 			
-			DataService ds = DataService.getInstance();
 			List<Company> companies = ds.getAllCompanies();
 			request.setAttribute("companies", companies);
 			
@@ -72,10 +86,9 @@ public class AddComputerServlet extends HttpServlet {
 		}
 		
 		// ComputerDto is valid, conversion to Computer
-		Computer computer = ComputerMapper.fromDto(cdto);
+		Computer computer = computerMapper.fromDto(cdto);
 		
 		// Creation in DB
-		DataService ds = DataService.getInstance();
 		RC rc = ds.createComputer(computer);
 		
 		if(rc == RC.FAILED) {

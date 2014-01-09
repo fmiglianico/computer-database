@@ -1,4 +1,4 @@
-package com.formation.computerdb.dao;
+package com.formation.computerdb.dao.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,7 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import com.formation.computerdb.common.DBLogActionType;
+import com.formation.computerdb.dao.DAOFactory;
+import com.formation.computerdb.dao.DBLogDAO;
 import com.formation.computerdb.domain.DBLog;
 
 /**
@@ -15,7 +20,11 @@ import com.formation.computerdb.domain.DBLog;
  * @author F. Miglianico
  *
  */
+@Repository
 public class DBLogDAOImpl implements DBLogDAO {
+	
+	@Autowired
+	private DAOFactory daoFactory;
 	
 	/**
 	 * Get a log
@@ -24,7 +33,7 @@ public class DBLogDAOImpl implements DBLogDAO {
 		DBLog dbLog = null;
 		ResultSet rs = null;
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 
 		try {
 			StringBuilder query = new StringBuilder("SELECT d.action, d.date, d.description FROM db_log AS d WHERE d.id = ").append(id);
@@ -56,7 +65,7 @@ public class DBLogDAOImpl implements DBLogDAO {
 	 */
 	public void create(DBLog dbLog) throws SQLException {
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 		
 		String query = "INSERT INTO db_log (action, date, description) VALUES (?, ?, ?)";
 		
@@ -90,7 +99,6 @@ public class DBLogDAOImpl implements DBLogDAO {
 			dbLog.setDescription(resultSet.getString("d.description"));
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

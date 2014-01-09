@@ -5,12 +5,12 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.formation.computerdb.common.RC;
 import com.formation.computerdb.domain.Company;
@@ -26,17 +26,26 @@ import com.formation.computerdb.validator.ComputerValidator;
  *
  */
 @WebServlet("/editComputer")
-public class EditComputerServlet extends HttpServlet {
+public class EditComputerServlet extends SpringInjectedServlet {
+	
 	private static final long serialVersionUID = 1L;
 	private Long id = null;
+	
 	private static Logger log = LoggerFactory.getLogger(EditComputerServlet.class);
+
+	@Autowired
+	private DataService ds = null;
+
+	@Autowired
+	private ComputerMapper computerMapper = null;
+
+	@Autowired
+	private ComputerValidator computerValidator = null;
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
 		
-		// Get companies
-		DataService ds = DataService.getInstance();
-		
+		// Get companies		
 		List<Company> companies = ds.getAllCompanies();
 		request.setAttribute("companies", companies);
 		
@@ -68,14 +77,13 @@ public class EditComputerServlet extends HttpServlet {
 			cdto.setCompanyId(null);
 		
 		// Validate values
-		int retCode = ComputerValidator.isValid(cdto);
+		int retCode = computerValidator.isValid(cdto);
 		
 		// if computer is not valid, notify user
 		if(retCode != 0) {
 			request.setAttribute("retCode", retCode);
 			request.setAttribute("cdto", cdto);
 			
-			DataService ds = DataService.getInstance();
 			List<Company> companies = ds.getAllCompanies();
 			request.setAttribute("companies", companies);
 			
@@ -85,9 +93,7 @@ public class EditComputerServlet extends HttpServlet {
 		}
 
 		// Else, update computer in DB
-		Computer computer = ComputerMapper.fromDto(cdto);
-		
-		DataService ds = DataService.getInstance();
+		Computer computer = computerMapper.fromDto(cdto);
 
 		RC rc = ds.updateComputer(computer);
 		

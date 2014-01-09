@@ -1,4 +1,4 @@
-package com.formation.computerdb.dao;
+package com.formation.computerdb.dao.impl;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -7,6 +7,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.formation.computerdb.dao.CompanyDAO;
+import com.formation.computerdb.dao.DAOFactory;
 import com.formation.computerdb.domain.Company;
 
 /**
@@ -14,7 +19,11 @@ import com.formation.computerdb.domain.Company;
  * @author F. Miglianico
  *
  */
+@Repository
 public class CompanyDAOImpl implements CompanyDAO {
+	
+	@Autowired
+	private DAOFactory daoFactory;
 	
 	protected CompanyDAOImpl() {
 	}
@@ -24,7 +33,7 @@ public class CompanyDAOImpl implements CompanyDAO {
 	 */
 	public List<Company> getAll() {
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 
 		List<Company> companies = new ArrayList<Company>();
 		ResultSet rs = null;
@@ -60,7 +69,7 @@ public class CompanyDAOImpl implements CompanyDAO {
 	 */
 	public Company get(int id) {
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 
 		Company company = null;
 		ResultSet rs = null;
@@ -103,7 +112,6 @@ public class CompanyDAOImpl implements CompanyDAO {
 			company.setName(resultSet.getString("c.name"));
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

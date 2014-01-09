@@ -1,4 +1,4 @@
-package com.formation.computerdb.dao;
+package com.formation.computerdb.dao.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,8 +10,12 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.formation.computerdb.common.OrderByColumn;
+import com.formation.computerdb.dao.ComputerDAO;
+import com.formation.computerdb.dao.DAOFactory;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.domain.Page;
@@ -21,9 +25,13 @@ import com.formation.computerdb.domain.Page;
  * @author F. Miglianico
  *
  */
+@Repository
 public class ComputerDAOImpl implements ComputerDAO {
 	
 	private static Logger log = LoggerFactory.getLogger(ComputerDAOImpl.class);
+	
+	@Autowired
+	private DAOFactory daoFactory;
 	
 	protected ComputerDAOImpl() {
 	}
@@ -37,7 +45,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 		Computer computer = null;
 		ResultSet rs = null;
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 
 		try {
 
@@ -75,7 +83,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 */
 	public void create(Computer computer) throws SQLException{
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 
 		String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
 		
@@ -117,7 +125,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 */
 	public void update(Computer computer) throws SQLException {
 
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 		
 		if(computer.getId() == null) {
 			log.error("Trying to update a computer without id : " + computer.toString());
@@ -158,7 +166,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 */
 	public void delete(int id) throws SQLException {
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 			
 		String query = "DELETE FROM computer WHERE id = " + id;
 
@@ -171,7 +179,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 */
 	public void fill(Page page) {
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 
 		List<Computer> computers = new ArrayList<Computer>();
 		ResultSet rs = null;
@@ -243,7 +251,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 		ResultSet rs = null;
 		Long count = null;
 		
-		Connection conn = DAOFactory.INSTANCE.getConn();
+		Connection conn = daoFactory.getConn();
 
 		try {
 
@@ -305,7 +313,6 @@ public class ComputerDAOImpl implements ComputerDAO {
 			computer.setCompany(company);
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

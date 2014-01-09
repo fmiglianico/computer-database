@@ -4,12 +4,12 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.formation.computerdb.common.OrderByColumn;
 import com.formation.computerdb.domain.Page;
@@ -21,7 +21,7 @@ import com.formation.computerdb.service.DataService;
  *
  */
 @WebServlet("/dashboard")
-public class ComputerServlet extends HttpServlet {
+public class ComputerServlet extends SpringInjectedServlet {
 	private static final long serialVersionUID = 1L;
 	
 	private static final int NB_ROWS_DEFAULT = 15;
@@ -37,10 +37,11 @@ public class ComputerServlet extends HttpServlet {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(ComputerServlet.class);
 
+	@Autowired
+	private DataService ds = null;
+
 	public void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
-		
-		DataService ds = DataService.getInstance();
 
 		// Get all the parameters of the page
 		Page page = new Page();

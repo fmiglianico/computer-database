@@ -1,8 +1,8 @@
 package com.formation.computerdb.util;
 
 public enum ComputerDBCatalog {
-	DISPLAYED_DATE_PATTERN("dd/MM/YYYY"),
-	STORED_DATE_PATTERN("YYYY-MM-dd");
+	DISPLAYED_DATE_PATTERN("dd/MM/yyyy"),
+	STORED_DATE_PATTERN("yyyy-MM-dd");
 	
 	private String value;
 	

@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.formation.computerdb.common.RC;
 import com.jolbox.bonecp.BoneCP;
@@ -16,13 +18,10 @@ import com.jolbox.bonecp.BoneCPConfig;
  * @author F. Miglianico
  *
  */
-public enum DAOFactory {
-	/**
-	 * The instance (Singleton)
-	 */
-	INSTANCE;
+@Component
+public class DAOFactory {
 	
-	private Logger log = LoggerFactory.getLogger(DAOFactory.class);
+	private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
 	
 	private BoneCP connectionPool = null;
 	private static ThreadLocal<Connection> thConn = new ThreadLocal<Connection>();
@@ -32,11 +31,16 @@ public enum DAOFactory {
 	private static final String DB_NAME = "computer-database-db?zeroDateTimeBehavior=convertToNull";
 	private static final String DB_USER = "root";
 	private static final String DB_PASSWORD = "";
-	private final static int MAX_CONN_PER_PARTITION = 5;
+	private static final int MAX_CONN_PER_PARTITION = 5;
 	
 	// The DAOs
+	@Autowired
 	private ComputerDAO computerDAO;
+	
+	@Autowired
 	private CompanyDAO companyDAO;
+	
+	@Autowired
 	private DBLogDAO dbLogDAO;
 	
 	/**
@@ -60,13 +64,8 @@ public enum DAOFactory {
 		try {
 			connectionPool = new BoneCP(config);
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			log.error("Error while init of connection pool : " + e1.getMessage(), e1);
 		}
-		
-		computerDAO = new ComputerDAOImpl();
-		companyDAO = new CompanyDAOImpl();
-		dbLogDAO = new DBLogDAOImpl();
 	}
 	
 	/**
@@ -122,7 +121,6 @@ public enum DAOFactory {
 			conn = connectionPool.getConnection();
 			thConn.set(conn);
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			log.error("Error while trying to fetch a connection : " + e1.getMessage());
 			e1.printStackTrace();
 			return RC.FAILED;
