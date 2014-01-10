@@ -7,9 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.formation.computerdb.common.RC;
 import com.formation.computerdb.domain.Company;
@@ -27,14 +28,10 @@ import com.formation.computerdb.validator.ComputerValidator;
 @Controller
 @RequestMapping("/addComputer")
 public class AddComputerController {
-	
-	private final static String NAME_LABEL = "name";
-	private final static String INTRODUCED_LABEL = "introduced";
-	private final static String DISCONTINUED_LABEL = "discontinued";
-	private final static String COMPANY_LABEL = "company";
+
 	private final static String COMPANIES_LABEL = "companies";
-	private final static String RETURN_CODE_LABEL = "retCode";
 	private final static String COMPUTER_DTO_LABEL = "cdto";
+	private final static String RESULT_LABEL = "result";
 	
 	private static Logger log = LoggerFactory.getLogger(AddComputerController.class);
 	
@@ -47,6 +44,11 @@ public class AddComputerController {
 	@Autowired
 	private ComputerValidator computerValidator = null;
 
+	/**
+	 * GET requests treatment
+	 * @param model the model passed to the page
+	 * @return the page to generate
+	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String doGet(ModelMap model) {
 		
@@ -54,52 +56,46 @@ public class AddComputerController {
 
 		// Send companies to jsp
 		model.addAttribute(COMPANIES_LABEL, companies);
+		model.addAttribute(COMPUTER_DTO_LABEL, new ComputerDto());
 		return "addComputer";
 
 	}
 	
+	/**
+	 * POST requests treatment
+	 * @param model the model passed to the jsp page
+	 * @param cdto the computer
+	 * @param result the result of the validation
+	 * @return the page/redirection
+	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public String doPost(@RequestParam(value = NAME_LABEL, required = true) String name, 
-			@RequestParam(value = INTRODUCED_LABEL, required = false) String introduced, 
-			@RequestParam(value = DISCONTINUED_LABEL, required = false) String discontinued, 
-			@RequestParam(value = COMPANY_LABEL, required = false) String company, 
-			ModelMap model) {
+	public String doPost(ModelMap model, @ModelAttribute("cdto") ComputerDto cdto,
+			BindingResult result) {
 		
-		// Creates DTO from parameters set by user
-		ComputerDto cdto = new ComputerDto();
-		cdto.setName(name);
-		cdto.setIntroduced(introduced);
-		cdto.setDiscontinued(discontinued);
-		cdto.setCompanyId(Long.valueOf(company));
-
-		if(cdto.getCompanyId() == 0)
-			cdto.setCompanyId(null);
+		computerValidator.validate(cdto, result);
 		
-		// Validate computer - error code returned if not valid
-		int retCode = computerValidator.isValid(cdto);
-		if(retCode != 0) {
-			model.addAttribute(RETURN_CODE_LABEL, retCode);
-			model.addAttribute(COMPUTER_DTO_LABEL, cdto);
-			
+		if(result.hasErrors()) {
+			// Get companies		
 			List<Company> companies = ds.getAllCompanies();
 			model.addAttribute(COMPANIES_LABEL, companies);
-			
+			model.addAttribute(RESULT_LABEL, result);
 			return "addComputer";
-		}
-		
-		// ComputerDto is valid, conversion to Computer
-		Computer computer = computerMapper.fromDto(cdto);
-		
-		// Creation in DB
-		RC rc = ds.createComputer(computer);
-		
-		if(rc == RC.FAILED) {
-			return "redirect:dashboard?message=creationNOK";
-		}
-		
-		log.info(new StringBuilder("Creation of computer \"").append(computer.getName()).append("\" successful").toString());
+			
+		} else {
+	
+			// Else, update computer in DB
+			Computer computer = computerMapper.fromDto(cdto);
 
-		return "redirect:dashboard?message=creationOK";
+			RC rc = ds.createComputer(computer);
+			
+			if(rc == RC.FAILED) {
+				return "redirect:dashboard?message=creationNOK";
+			}
+
+			log.info(new StringBuilder("Creation of computer \"").append(computer.getName()).append("\" successful").toString());
+			
+			return "redirect:dashboard?message=creationOK";
+		}
 
 	}
 }

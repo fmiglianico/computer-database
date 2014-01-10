@@ -8,18 +8,6 @@ package com.formation.computerdb.util;
 public class CdbLib {
 	
 	/**
-	 * Equivalent of | operator
-	 * @param code the return code
-	 * @param e the bit to test
-	 * @return "has-error" if flag is up
-	 */
-	public static String bitwiseAnd(Integer code, int e) {
-		if(code == null)
-			return "";
-		return (code & e) == 0 ? "" : "has-error";
-	}
-	
-	/**
 	 * Pager is like [1 2 ... x-2 x-1 x x+1 x+2 ... n-1 n] 
 	 * This function is used to compute the (x-2) value
 	 * @param currPage

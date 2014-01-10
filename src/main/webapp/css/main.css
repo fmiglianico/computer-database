@@ -91,22 +91,22 @@ label {
 	font-weight: bold;
 }
 
-#name {
+th#name {
 	width: 25%;
 }
 
-#intro {
+th#intro {
 	width: 15%;
 }
 
-#disco {
+th#disco {
 	width: 15%;
 }
 
-#company {
+th#company {
 	width: 25%;
 }
 
-#actionbuttons {
+th#actionbuttons {
 	width: 20%;
 }

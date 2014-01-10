@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="WEB-INF/cdblib" prefix="cdblib" %>
 
 <jsp:include page="include/header.jsp" />
@@ -9,60 +10,63 @@
 	</div>
 
 	<div class="">
-		<form class="form-horizontal clearfix" role="form"
-			action="editComputer" method="POST">
+		<form:form cssClass="form-horizontal clearfix" commandName="cdto"
+			action="editComputer">
 
-			<div class="clearfix">
-				<div class="form-group ${cdblib:bitwiseAnd(retCode, 1)}">
+			<div class="clearfix ${result.getFieldError('name') == null ? '' : 'has-error'}">
+				<div class="form-group">
 					<label for="name" class="col-sm-2 control-label">Computer
 						name</label>
 					<div class="col-sm-6">
-						<input type="text" class="form-control" name="name"
-							placeholder="Computer Name" value="${ cdto.name }">
+						<form:input type="text" cssClass="form-control" name="name"
+							placeholder="Computer Name" path="name"/>
+					</div>
+					<div class="col-sm-2 form-control-static">
+						<form:errors path="name" cssClass="text-danger" />
 					</div>
 				</div>
 			</div>
 
-			<div class="clearfix">
-				<div class="form-group ${cdblib:bitwiseAnd(retCode, 2)}">
+			<div class="clearfix ${result.getFieldError('introduced') == null ? '' : 'has-error'}">
+				<div class="form-group">
 					<label for="introduced" class="col-sm-2 control-label">Introduced
 						Date</label>
 					<div class="col-sm-6">
-						<input type="date" class="form-control" name="introduced"
-							value="${ cdto.introduced }" pattern="dd-MM-YYYY" />
+						<form:input type="date" cssClass="form-control" name="introduced"
+							pattern="dd-MM-YYYY" path="introduced"/>
+					</div>
+					<div class="col-sm-2 form-control-static">
+						<form:errors path="introduced" cssClass="text-danger" />
 					</div>
 				</div>
 			</div>
 
-			<div class="clearfix">
-				<div class="form-group ${cdblib:bitwiseAnd(retCode, 4)}">
+			<div class="clearfix ${result.getFieldError('discontinued') == null ? '' : 'has-error'}">
+				<div class="form-group">
 					<label for="discontinued" class="col-sm-2 control-label">Discontinued
 						Date</label>
 					<div class="col-sm-6">
-						<input type="date" class="form-control" name="discontinued"
-							value="${ cdto.discontinued }" pattern="dd-MM-YYYY" />
+						<form:input type="date" cssClass="form-control" name="discontinued"
+							pattern="dd-MM-YYYY" path="discontinued"/>
+					</div>
+					<div class="col-sm-2 form-control-static">
+						<form:errors path="discontinued" cssClass="text-danger" />
 					</div>
 				</div>
 			</div>
 
-			<div class="clearfix">
-				<div class="form-group ${cdblib:bitwiseAnd(retCode, 8)}">
+			<div class="clearfix ${result.getFieldError('companyId') == null ? '' : 'has-error'}">
+				<div class="form-group">
 					<label for="company" class="col-sm-2 control-label">Company
 						Name</label>
 					<div class="input col-sm-6">
-						<select name="company" class="form-control">
-							<option value="0">--</option>
-							<c:forEach items="${ companies }" var="c">
-								<c:choose>
-									<c:when test="${ c.id == cdto.companyId }">
-										<option value="${ c.id }" selected>${ c.name }</option>
-									</c:when>
-									<c:otherwise>
-										<option value="${ c.id }">${ c.name }</option>
-									</c:otherwise>
-								</c:choose>
-							</c:forEach>
-						</select>
+						<form:select name="company" cssClass="form-control" path="companyId">
+							<form:option value="" label="--"/>
+							<form:options items="${companies}" itemValue="id" itemLabel="name"/>
+						</form:select>
+					</div>
+					<div class="col-sm-2 form-control-static">
+						<form:errors path="companyId" cssClass="text-danger" />
 					</div>
 				</div>
 			</div>
@@ -72,7 +76,7 @@
 				or <a href="dashboard" class="btn btn-default">Cancel</a>
 			</div>
 
-		</form>
+		</form:form>
 	</div>
 </div>
 

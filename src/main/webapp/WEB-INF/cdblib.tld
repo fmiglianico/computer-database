@@ -18,11 +18,6 @@
         <path>/WEB-INF/tags/limitsetter.tag</path>
     </tag-file>
     <function>
-        <name>bitwiseAnd</name>
-        <function-class>com.formation.computerdb.util.CdbLib</function-class>
-        <function-signature>java.lang.String bitwiseAnd(java.lang.Integer, int)</function-signature>
-    </function>
-    <function>
         <name>getMiddleRangeStart</name>
         <function-class>com.formation.computerdb.util.CdbLib</function-class>
         <function-signature>int getMiddleRangeStart(int)</function-signature>

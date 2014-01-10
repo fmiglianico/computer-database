@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,14 +30,10 @@ import com.formation.computerdb.validator.ComputerValidator;
 @RequestMapping("/editComputer")
 public class EditComputerController {
 	
-	private final static String NAME_LABEL = "name";
-	private final static String INTRODUCED_LABEL = "introduced";
-	private final static String DISCONTINUED_LABEL = "discontinued";
-	private final static String COMPANY_LABEL = "company";
 	private final static String COMPANIES_LABEL = "companies";
-	private final static String RETURN_CODE_LABEL = "retCode";
 	private final static String COMPUTER_DTO_LABEL = "cdto";
 	private static final String ID_LABEL = "id";
+	private static final String RESULT_LABEL = "result";
 	
 	private Long id = null;
 	
@@ -49,7 +47,13 @@ public class EditComputerController {
 
 	@Autowired
 	private ComputerValidator computerValidator = null;
-
+	
+	/**
+	 * GET requests treatment
+	 * @param sId the id as a String of the computer to edit
+	 * @param model the model passed to the page
+	 * @return the redirection/page to generate
+	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String doGet(@RequestParam(value = ID_LABEL, required = true) String sId,  
 				ModelMap model) {
@@ -61,7 +65,7 @@ public class EditComputerController {
 		// Get computer to be edited
 		id = Long.valueOf(sId);
 		if(id == null)
-			return "dashboard";
+			return "redirect:dashboard";
 		
 		Computer computer = ds.getComputer(id.intValue());
 		ComputerDto cdto = ComputerMapper.toDto(computer);
@@ -71,50 +75,42 @@ public class EditComputerController {
 
 	}
 
+	/**
+	 * POST requests treatment
+	 * @param model the model passed to the jsp page
+	 * @param cdto the computer
+	 * @param result the result of the validation
+	 * @return the page/redirection
+	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public String doPost(@RequestParam(value = NAME_LABEL, required = true) String name, 
-			@RequestParam(value = INTRODUCED_LABEL, required = false) String introduced, 
-			@RequestParam(value = DISCONTINUED_LABEL, required = false) String discontinued, 
-			@RequestParam(value = COMPANY_LABEL, required = false) String company, 
-			ModelMap model) {
+	public String doPost(ModelMap model, @ModelAttribute("cdto") ComputerDto cdto,
+			BindingResult result) {
 		
-		// Get Computer attribute into Dto
-		ComputerDto cdto = new ComputerDto();
-		cdto.setId(id);
-		cdto.setName(name);
-		cdto.setIntroduced(introduced);
-		cdto.setDiscontinued(discontinued);
-		cdto.setCompanyId(Long.valueOf(company));
+		computerValidator.validate(cdto, result);
 		
-		if(cdto.getCompanyId() == 0)
-			cdto.setCompanyId(null);
-		
-		// Validate values
-		int retCode = computerValidator.isValid(cdto);
-		
-		// if computer is not valid, notify user
-		if(retCode != 0) {
-			model.addAttribute(RETURN_CODE_LABEL, retCode);
-			model.addAttribute(COMPUTER_DTO_LABEL, cdto);
-			
+		if(result.hasErrors()) {
+			// Get companies		
 			List<Company> companies = ds.getAllCompanies();
 			model.addAttribute(COMPANIES_LABEL, companies);
-			
+			model.addAttribute(RESULT_LABEL, result);
 			return "editComputer";
+			
+		} else {
+		
+			// Set ID of ComputerDTO
+			cdto.setId(id);
+	
+			// Update computer in DB
+			Computer computer = computerMapper.fromDto(cdto);
+			RC rc = ds.updateComputer(computer);
+			if(rc == RC.FAILED) {
+				return "redirect:dashboard?message=editNOK";
+			}
+			
+			log.info(new StringBuilder("Edition of computer \"").append(computer.getName()).append("\" successful").toString());
+			
+			return "redirect:dashboard?message=editOK";
 		}
-
-		// Else, update computer in DB
-		Computer computer = computerMapper.fromDto(cdto);
-
-		RC rc = ds.updateComputer(computer);
-		
-		if(rc == RC.FAILED) {
-			return "redirect:dashboard?message=editNOK";
-		}
-		
-		log.info(new StringBuilder("Edition of computer \"").append(computer.getName()).append("\" successful").toString());
-		
-		return "redirect:dashboard?message=editOK";
 
 	}
 }

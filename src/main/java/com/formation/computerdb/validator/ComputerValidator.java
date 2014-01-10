@@ -7,8 +7,10 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
 
-import com.formation.computerdb.common.ValidationError;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.dto.ComputerDto;
 import com.formation.computerdb.service.DataService;
@@ -20,27 +22,28 @@ import com.formation.computerdb.util.ComputerDBCatalog;
  *
  */
 @Component
-public class ComputerValidator {
+public class ComputerValidator implements Validator {
 
 	private static final SimpleDateFormat sdf = new SimpleDateFormat(ComputerDBCatalog.STORED_DATE_PATTERN.getValue());
 	
 	@Autowired
 	private DataService ds;
-	 
+
+	@Override
+	public boolean supports(Class<?> arg0) {
+		return ComputerDto.class.equals(arg0);
+	}
+
 	/**
 	 * Validates a ComputerDto
-	 * @param cdto the ComputerDto 
-	 * @return
 	 */
-	public int isValid(ComputerDto cdto) {
+	@Override
+	public void validate(Object obj, Errors e) {
 		
-		int retCode = 0;
+		ValidationUtils.rejectIfEmptyOrWhitespace(e, "name", "name.empty");
 		
-		// Verify if name is null or empty
-		String name = cdto.getName();
-		if(name == null || name.equals(""))
-			retCode |= ValidationError.NULL_NAME.getFlag();
-
+		ComputerDto cdto = (ComputerDto)obj;
+		
 		// Verify that dates are in range
 		Calendar lastValidDate = Calendar.getInstance();
 		lastValidDate.set(2100, 1, 1);
@@ -53,10 +56,10 @@ public class ComputerValidator {
 			try {
 				Date d = sdf.parse(introduction);
 				if(d.after(lastValidDate.getTime()) || d.before(firstValidDate.getTime())) {
-					retCode |= ValidationError.UNPARSEABLE_INTRODUCED_DATE.getFlag();
+					e.rejectValue("introduced", "introduced.date.invalid");
 				}
-			} catch (ParseException e) {
-				retCode |= ValidationError.UNPARSEABLE_INTRODUCED_DATE.getFlag();
+			} catch (ParseException e1) {
+				e.rejectValue("introduced", "introduced.date.unparseable");
 			}
 		}
 		
@@ -66,10 +69,10 @@ public class ComputerValidator {
 			try {
 				Date d = sdf.parse(discontinued);
 				if(d.after(lastValidDate.getTime()) || d.before(firstValidDate.getTime())) {
-					retCode |= ValidationError.UNPARSEABLE_DISCONTINUED_DATE.getFlag();
+					e.rejectValue("discontinued", "discontinued.date.invalid");
 				}
-			} catch (ParseException e) {
-				retCode |= ValidationError.UNPARSEABLE_DISCONTINUED_DATE.getFlag();
+			} catch (ParseException e1) {
+				e.rejectValue("discontinued", "discontinued.date.unparseable");
 			}
 		}
 		
@@ -78,9 +81,8 @@ public class ComputerValidator {
 		if(companyId != null) {
 			Company company = ds.getCompany(companyId.intValue());
 			if(company == null)
-				retCode |= ValidationError.UNKNOWN_COMPANY.getFlag();
+				e.rejectValue("companyId", "company.not.found");
 		}
 		
-		return retCode;	
 	}
 }
