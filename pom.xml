@@ -93,7 +93,21 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>5.0.2.Final</version>
 		</dependency>
-
+		
+		<!-- Joda-Time -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.3</version>
+		</dependency> 
+		
+		<!-- Joda Time - JSP tags -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time-jsptags</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		            
 	</dependencies>
 
 	<build>

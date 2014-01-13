@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -73,9 +74,9 @@ public class DBLogDAOImpl implements DBLogDAO {
 		statement.setString(1, dbLog.getActionType().toString());
 		
 		if(dbLog.getDate() != null)
-			statement.setTimestamp(2, new java.sql.Timestamp(dbLog.getDate().getTime()));
+			statement.setTimestamp(2, new java.sql.Timestamp(dbLog.getDate().getMillis()));
 		else
-			statement.setNull(2, java.sql.Types.DATE);
+			statement.setNull(2, java.sql.Types.TIMESTAMP);
 		
 		statement.setString(3, dbLog.getDescription());
 		
@@ -95,7 +96,7 @@ public class DBLogDAOImpl implements DBLogDAO {
 			DBLogActionType actionType = DBLogActionType.valueOf(action);
 			dbLog.setActionType(actionType);
 			
-			dbLog.setDate(resultSet.getDate("d.date"));
+			dbLog.setDate(new DateTime(resultSet.getDate("d.date")));
 			dbLog.setDescription(resultSet.getString("d.description"));
 
 		} catch (SQLException e) {

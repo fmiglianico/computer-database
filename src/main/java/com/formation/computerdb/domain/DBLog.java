@@ -1,6 +1,6 @@
 package com.formation.computerdb.domain;
 
-import java.util.Date;
+import org.joda.time.DateTime;
 
 import com.formation.computerdb.common.DBLogActionType;
 
@@ -11,7 +11,7 @@ import com.formation.computerdb.common.DBLogActionType;
  */
 public class DBLog {
 	private DBLogActionType actionType;
-	private Date date;
+	private DateTime date;
 	private String description;
 	
 	public DBLog() {
@@ -20,7 +20,7 @@ public class DBLog {
 		this.description = null;
 	}
 	
-	public DBLog(DBLogActionType actionType, Date date, String description) {
+	public DBLog(DBLogActionType actionType, DateTime date, String description) {
 		this.setActionType(actionType);
 		this.setDate(date);
 		this.setDescription(description);
@@ -41,13 +41,13 @@ public class DBLog {
 	/**
 	 * @return the date
 	 */
-	public Date getDate() {
+	public DateTime getDate() {
 		return date;
 	}
 	/**
 	 * @param date the date to set
 	 */
-	public void setDate(Date date) {
+	public void setDate(DateTime date) {
 		this.date = date;
 	}
 	/**

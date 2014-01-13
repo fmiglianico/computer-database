@@ -109,12 +109,12 @@ public class EditComputerController {
 			Computer computer = computerMapper.fromDto(cdto);
 			RC rc = ds.updateComputer(computer);
 			if(rc == RC.FAILED) {
-				return "redirect:dashboard?message=editNOK";
+				return "redirect:dashboard?message=edit&status=danger";
 			}
 			
 			log.info(new StringBuilder("Edition of computer \"").append(computer.getName()).append("\" successful").toString());
 			
-			return "redirect:dashboard?message=editOK";
+			return "redirect:dashboard?message=edit&status=success";
 		}
 
 	}

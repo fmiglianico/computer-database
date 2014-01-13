@@ -96,12 +96,12 @@ public class AddComputerController {
 			RC rc = ds.createComputer(computer);
 			
 			if(rc == RC.FAILED) {
-				return "redirect:dashboard?message=creationNOK";
+				return "redirect:dashboard?message=create&status=danger";
 			}
 
 			log.info(new StringBuilder("Creation of computer \"").append(computer.getName()).append("\" successful").toString());
 			
-			return "redirect:dashboard?message=creationOK";
+			return "redirect:dashboard?message=create&status=success";
 		}
 
 	}

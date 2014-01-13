@@ -1,9 +1,9 @@
 package com.formation.computerdb.service.impl;
 
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.List;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,9 +67,9 @@ public class DataServiceImpl implements DataService {
 			computerDAO.create(computer);
 			DBLog dbLog;
 			if(computer.getId() != null)
-				dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, Calendar.getInstance().getTime(), computer.getId().toString());
+				dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, new DateTime(), computer.getId().toString());
 			else
-				dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, Calendar.getInstance().getTime(), "Unknown ID");
+				dbLog = new DBLog(DBLogActionType.COMPUTER_ADDED, new DateTime(), "Unknown ID");
 			
 			dbLogDAO.create(dbLog);
 		} catch (SQLException e) {
@@ -89,7 +89,7 @@ public class DataServiceImpl implements DataService {
 	public RC updateComputer(Computer computer) {
 		daoFactory.setConn();
 		
-		DBLog dbLog = new DBLog(DBLogActionType.COMPUTER_UPDATED, Calendar.getInstance().getTime(), computer.getId().toString());
+		DBLog dbLog = new DBLog(DBLogActionType.COMPUTER_UPDATED, new DateTime(), computer.getId().toString());
 		try {
 			computerDAO.update(computer);
 			dbLogDAO.create(dbLog);
@@ -110,7 +110,7 @@ public class DataServiceImpl implements DataService {
 	public RC deleteComputer(int id) {
 		daoFactory.setConn();
 		
-		DBLog dbLog = new DBLog(DBLogActionType.COMPUTER_DELETED, Calendar.getInstance().getTime(), "" + id);
+		DBLog dbLog = new DBLog(DBLogActionType.COMPUTER_DELETED, new DateTime(), "" + id);
 		try {
 			computerDAO.delete(id);
 			dbLogDAO.create(dbLog);

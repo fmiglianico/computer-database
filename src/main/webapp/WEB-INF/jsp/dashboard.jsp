@@ -2,6 +2,7 @@
 <%@ taglib uri="WEB-INF/cdblib" prefix="cdblib" %>
 <%@ taglib prefix="custom" tagdir="/WEB-INF/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="http://www.joda.org/joda/time/tags" prefix="joda" %>
 
 <jsp:include page="include/header.jsp" />
 
@@ -13,10 +14,7 @@
 	
 	<c:if test="${not empty message}">
 		<div class="alert alert-${status}">
-			<c:if test="${not empty messageHeader}">
-				<strong>${messageHeader}</strong>
-			</c:if>
-			${message}
+			<spring:message code="dashboard.alert.${message}.${status}" />
 		</div>
 	</c:if>
 	
@@ -75,9 +73,10 @@
 				<c:forEach items="${wrap.list}" var="c">
                <tr>
 						<td><a href="editComputer?id=${ c.id }" onclick="">${ c.name }</a></td>
-						<td>${ c.displayedIntroduced}</td>
-						<td>${ c.displayedDiscontinued}</td>
-						<td>${ c.company.name }</td>
+						<spring:message code="date.format" var="dateFormat"/>
+						<td><joda:format value="${c.introduced}" pattern="${dateFormat}"/></td>
+						<td><joda:format value="${c.discontinued}" pattern="${dateFormat}"/></td>
+						<td>${c.company.name }</td>
 						<td>
 							<a class="btn btn-sm btn-default" id="edit" href="editComputer?id=${ c.id }"><spring:message code="dashboard.table.actions.edit"/></a>
 							<a class="btn btn-sm btn-default" id="delete" href="deleteComputer?id=${ c.id }"><spring:message code="dashboard.table.actions.delete"/></a>

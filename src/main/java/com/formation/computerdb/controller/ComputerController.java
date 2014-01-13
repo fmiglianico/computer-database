@@ -30,6 +30,7 @@ public class ComputerController {
 	private final static String CURR_PAGE_LABEL = "page";
 	private final static String NB_ROWS_LABEL = "nbrows";
 	private final static String MESSAGE_LABEL = "message";
+	private final static String STATUS_LABEL = "status";
 
 	private final static String PAGE_WRAPPER_LABEL = "wrap";
 	
@@ -46,6 +47,7 @@ public class ComputerController {
 			@RequestParam(value = CURR_PAGE_LABEL, required = false) String sPage, 
 			@RequestParam(value = NB_ROWS_LABEL, required = false) String sNbRows, 
 			@RequestParam(value = MESSAGE_LABEL, required = false) String message,
+			@RequestParam(value = STATUS_LABEL, required = false) String status,
 			ModelMap model) {
 
 		// Get all the parameters of the page
@@ -75,32 +77,9 @@ public class ComputerController {
 		
 		
 		// Messages
-		if(message != null) {
-			if(message.equals("creationOK")) {
-				model.addAttribute("message", "Creation of computer successful");
-				model.addAttribute("messageHeader", "Well done!");
-				model.addAttribute("status", "success");
-			} else if(message.equals("editOK")){
-				model.addAttribute("messageHeader", "Well done!");
-				model.addAttribute("message", "Computer edited successfully");
-				model.addAttribute("status", "success");
-			} else if(message.equals("deleteOK")){
-				model.addAttribute("messageHeader", "Well done!");
-				model.addAttribute("message", "Computer deleted successfully");
-				model.addAttribute("status", "success");
-			} else if(message.equals("creationNOK")){
-				model.addAttribute("messageHeader", "Error!");
-				model.addAttribute("message", "An error occured while trying to create the computer. Please try again later.");
-				model.addAttribute("status", "danger");
-			} else if(message.equals("editNOK")){
-				model.addAttribute("messageHeader", "Error!");
-				model.addAttribute("message", "An error occured while trying to edit the computer. Please try again later.");
-				model.addAttribute("status", "danger");
-			} else if(message.equals("deleteNOK")){
-				model.addAttribute("messageHeader", "Error!");
-				model.addAttribute("message", "An error occured while trying to delete the computer. Please try again later.");
-				model.addAttribute("status", "danger");
-			}
+		if(message != null && status != null) {
+			model.addAttribute(MESSAGE_LABEL, message);
+			model.addAttribute(STATUS_LABEL, status);
 		}
 		
 		// Get computer list in page

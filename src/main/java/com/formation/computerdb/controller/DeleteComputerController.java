@@ -35,9 +35,9 @@ public class DeleteComputerController {
 		RC rc = ds.deleteComputer(id.intValue());
 		
 		if(rc == RC.FAILED) {
-			return "redirect:dashboard?message=deleteNOK";
+			return "redirect:dashboard?message=delete&status=danger";
 		}
 
-		return "redirect:dashboard?message=deleteOK";
+		return "redirect:dashboard?message=delete&status=success";
 	}
 }

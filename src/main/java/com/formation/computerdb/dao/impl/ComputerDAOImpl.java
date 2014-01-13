@@ -5,9 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,14 +97,14 @@ public class ComputerDAOImpl implements ComputerDAO {
 			statement.setNull(2, java.sql.Types.BIGINT);
 		
 		if(computer.getIntroduced() != null)
-			statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
+			statement.setTimestamp(3, new Timestamp(computer.getIntroduced().getMillis()));
 		else
-			statement.setNull(3, java.sql.Types.DATE);
+			statement.setNull(3, java.sql.Types.TIMESTAMP);
 		
 		if(computer.getDiscontinued() != null)
-			statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
+			statement.setTimestamp(4, new Timestamp(computer.getDiscontinued().getMillis()));
 		else
-			statement.setNull(4, java.sql.Types.DATE);
+			statement.setNull(4, java.sql.Types.TIMESTAMP);
 		
 		statement.executeUpdate();
 		
@@ -145,16 +147,17 @@ public class ComputerDAOImpl implements ComputerDAO {
 			statement.setLong(2, computer.getCompany().getId());
 		else
 			statement.setNull(2, java.sql.Types.BIGINT);
-		
+
 		if(computer.getIntroduced() != null)
-			statement.setDate(3, new java.sql.Date(computer.getIntroduced().getTimeInMillis()));
+			statement.setTimestamp(3, new Timestamp(computer.getIntroduced().getMillis()));
 		else
-			statement.setNull(3, java.sql.Types.DATE);
+			statement.setNull(3, java.sql.Types.TIMESTAMP);
 		
 		if(computer.getDiscontinued() != null)
-			statement.setDate(4, new java.sql.Date(computer.getDiscontinued().getTimeInMillis()));
+			statement.setTimestamp(4, new Timestamp(computer.getDiscontinued().getMillis()));
 		else
-			statement.setNull(4, java.sql.Types.DATE);
+			statement.setNull(4, java.sql.Types.TIMESTAMP);
+	
 		
 		// Execute query
 		statement.executeUpdate();
@@ -297,13 +300,21 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * @return the computer
 	 */
 	private Computer mapComputer( ResultSet resultSet ) {
+		
+		if(resultSet == null)
+			return null;
+		
 		Computer computer = new Computer();
 
 		try {
 			computer.setId(resultSet.getLong("cr.id"));
 			computer.setName(resultSet.getString("cr.name"));
-			computer.setIntroduced(resultSet.getDate("cr.introduced"));
-			computer.setDiscontinued(resultSet.getDate("cr.discontinued"));
+			Timestamp ts = resultSet.getTimestamp("cr.introduced");
+			if(ts != null)
+				computer.setIntroduced(new DateTime(ts));
+			ts = resultSet.getTimestamp("cr.discontinued");
+			if(ts != null)
+				computer.setDiscontinued(new DateTime(ts));
 			
 			Company company = new Company();
 

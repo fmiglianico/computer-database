@@ -1,9 +1,6 @@
 package com.formation.computerdb.mapper;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +35,10 @@ public class ComputerMapper {
 		
 		cdto.setId(computer.getId());
 		cdto.setName(computer.getName());
-		cdto.setIntroduced(computer.getStoredIntroduced());
-		cdto.setDiscontinued(computer.getStoredDiscontinued());
+		if(computer.getIntroduced() != null)
+			cdto.setIntroduced(computer.getIntroduced().toString(ComputerDBCatalog.STORED_DATE_PATTERN.getValue()));
+		if(computer.getDiscontinued() != null)
+			cdto.setDiscontinued(computer.getDiscontinued().toString(ComputerDBCatalog.STORED_DATE_PATTERN.getValue()));
 		cdto.setCompanyId(computer.getCompany() == null ? null : computer.getCompany().getId());
 		
 		return cdto;
@@ -58,23 +57,20 @@ public class ComputerMapper {
 		computer.setId(cdto.getId());
 		computer.setName(cdto.getName());
 		
-		SimpleDateFormat sdf = new SimpleDateFormat(ComputerDBCatalog.STORED_DATE_PATTERN.getValue());
 
 		String sIntroduced = cdto.getIntroduced();
 		String sDiscontinued = cdto.getDiscontinued();
 
 		try {
 			if(sIntroduced != null && !sIntroduced.isEmpty()) {
-				Date introduced = sdf.parse(sIntroduced);
-				computer.setIntroduced(introduced);
+				computer.setIntroduced(DateTime.parse(sIntroduced)); // Default parser: yyyy-MM-dd @see DateTimeFormatter dateTimeParser()
 			}
-
+	
 			if(sDiscontinued != null && !sDiscontinued.isEmpty()) {
-				Date discontinued = sdf.parse(sDiscontinued);
-				computer.setDiscontinued(discontinued);
+				computer.setDiscontinued(DateTime.parse(sDiscontinued));
 			}
-		} catch (ParseException e) {
-			log.error("Cannot parse date", e);
+		} catch(IllegalArgumentException e) {
+			log.error("Cannot parse date : " + e.getMessage(), e);
 		}
 		
 		Long companyId = cdto.getCompanyId();

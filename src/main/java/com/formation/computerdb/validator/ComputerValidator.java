@@ -1,10 +1,6 @@
 package com.formation.computerdb.validator;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -14,7 +10,6 @@ import org.springframework.validation.Validator;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.dto.ComputerDto;
 import com.formation.computerdb.service.DataService;
-import com.formation.computerdb.util.ComputerDBCatalog;
 
 /**
  * Validator for computer entities given through edit and add computer pages
@@ -24,10 +19,8 @@ import com.formation.computerdb.util.ComputerDBCatalog;
 @Component
 public class ComputerValidator implements Validator {
 
-	private static final SimpleDateFormat sdf = new SimpleDateFormat(ComputerDBCatalog.STORED_DATE_PATTERN.getValue());
-	
-	private static Calendar lastValidDate = null;
-	private static Calendar firstValidDate = null;
+	private static final DateTime firstValidDate = new DateTime(1970, 1, 1, 0, 0, 1);
+	private static final DateTime lastValidDate = new DateTime(2038, 1, 19, 3, 14, 07);
 	
 	
 	@Autowired
@@ -47,40 +40,35 @@ public class ComputerValidator implements Validator {
 		ValidationUtils.rejectIfEmptyOrWhitespace(e, "name", "form.name.empty");
 		
 		ComputerDto cdto = (ComputerDto)obj;
-		
-		if(lastValidDate == null && firstValidDate == null) {
-			// Verify that dates are in range
-			lastValidDate = Calendar.getInstance();
-			lastValidDate.set(2100, 1, 1);
-			firstValidDate = Calendar.getInstance();
-			firstValidDate.set(1900, 1, 1);
-		}
-		
-			// Introduced date
-		String introduction = cdto.getIntroduced();
-		if(introduction != null && introduction != "") {
+
+		// Introduced date
+		String sIntroduced = cdto.getIntroduced();
+		if(sIntroduced != null && !sIntroduced.isEmpty()) {
 			try {
-				Date d = sdf.parse(introduction);
-				if(d.after(lastValidDate.getTime()) || d.before(firstValidDate.getTime())) {
-					e.rejectValue("introduced", "form.introduced.date.invalid");
+				DateTime introduced = DateTime.parse(sIntroduced);
+				if(introduced != null) {
+					if(introduced.isAfter(lastValidDate) || introduced.isBefore(firstValidDate))
+						e.rejectValue("introduced", "form.introduced.date.invalid");
 				}
-			} catch (ParseException e1) {
+			} catch(IllegalArgumentException iae) {
 				e.rejectValue("introduced", "form.introduced.date.unparseable");
 			}
 		}
 		
-			// Discontinued date
-		String discontinued = cdto.getDiscontinued();
-		if(discontinued != null && discontinued != "") {
+		// Discontinued date
+		String sDiscontinued = cdto.getDiscontinued();
+		if(sDiscontinued != null && !sDiscontinued.isEmpty()) {
 			try {
-				Date d = sdf.parse(discontinued);
-				if(d.after(lastValidDate.getTime()) || d.before(firstValidDate.getTime())) {
-					e.rejectValue("discontinued", "form.discontinued.date.invalid");
+				DateTime discontinued = DateTime.parse(sDiscontinued);
+				if(discontinued != null) {
+					if(discontinued.isAfter(lastValidDate) || discontinued.isBefore(firstValidDate))
+						e.rejectValue("discontinued", "form.discontinued.date.invalid");
 				}
-			} catch (ParseException e1) {
+			} catch(IllegalArgumentException iae) {
 				e.rejectValue("discontinued", "form.discontinued.date.unparseable");
 			}
 		}
+		
 		
 		// Verify that the company exists in DB
 		Long companyId = cdto.getCompanyId();

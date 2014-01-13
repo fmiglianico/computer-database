@@ -3,11 +3,7 @@
  */
 package com.formation.computerdb.domain;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
-import com.formation.computerdb.util.ComputerDBCatalog;
+import org.joda.time.DateTime;
 
 /**
  * Class representing a Computer
@@ -18,11 +14,8 @@ public class Computer {
 	private Long id;
 	private String name;
 	private Company company;
-	private Calendar introduced;
-	private Calendar discontinued;
-
-	private static final SimpleDateFormat displayedSDF = new SimpleDateFormat(ComputerDBCatalog.DISPLAYED_DATE_PATTERN.getValue());
-	private static final SimpleDateFormat storedSDF = new SimpleDateFormat(ComputerDBCatalog.STORED_DATE_PATTERN.getValue());
+	private DateTime introduced;
+	private DateTime discontinued;
 
 	/**
 	 * Empty constructor
@@ -43,19 +36,13 @@ public class Computer {
 	 * @param introduced
 	 * @param discontinued
 	 */
-	public Computer(Long id, String name, Company company, Date introduced, Date discontinued) {
-		this.id = id;
-		this.name = name;
-		this.company = company;
-		
-		if(introduced != null) {
-			this.introduced = Calendar.getInstance();
-			this.introduced.setTime(introduced);
-		}
-		if(discontinued != null) {
-			this.discontinued = Calendar.getInstance();
-			this.discontinued.setTime(discontinued);
-		}
+	public Computer(Long id, String name, Company company, DateTime introduced, DateTime discontinued) {
+		this.setId(id);
+		this.setName(name);
+		this.setCompany(company);
+		this.setIntroduced(introduced);
+		this.setDiscontinued(discontinued);
+
 	}
 	/**
 	 * @return the id
@@ -98,76 +85,28 @@ public class Computer {
 	/**
 	 * @return the introduced
 	 */
-	public Calendar getIntroduced() {
+	public DateTime getIntroduced() {
 		return introduced;
-	}
-	
-	/**
-	 * @return the introduced date as a string
-	 */
-	public String getDisplayedIntroduced() {
-		if(this.introduced == null)
-			return "";
-		
-		return displayedSDF.format(this.introduced.getTime());
-	}
-	
-	/**
-	 * @return the introduced date as a string
-	 */
-	public String getStoredIntroduced() {
-		if(this.introduced == null)
-			return "";
-		
-		return storedSDF.format(this.introduced.getTime());
 	}
 	
 	/**
 	 * @param introduced the introduced to set
 	 */
-	public void setIntroduced(Date introduced) {
-		if(introduced != null) {
-			if(this.introduced == null)
-				this.introduced = Calendar.getInstance();
-			this.introduced.setTime(introduced);
-		}
+	public void setIntroduced(DateTime introduced) {
+			this.introduced = introduced;
 	}
 	/**
 	 * @return the discontinued
 	 */
-	public Calendar getDiscontinued() {
+	public DateTime getDiscontinued() {
 		return discontinued;
-	}
-	
-	/**
-	 * @return the introduced date as a string
-	 */
-	public String getDisplayedDiscontinued() {
-		if(this.discontinued == null)
-			return "";
-		
-		return displayedSDF.format(this.discontinued.getTime());
-	}
-	
-	/**
-	 * @return the introduced date as a string
-	 */
-	public String getStoredDiscontinued() {
-		if(this.discontinued == null)
-			return "";
-		
-		return storedSDF.format(this.discontinued.getTime());
 	}
 	
 	/**
 	 * @param discontinued the discontinued to set
 	 */
-	public void setDiscontinued(Date discontinued) {
-		if(discontinued != null) {
-			if(this.discontinued == null)
-				this.discontinued = Calendar.getInstance();
-			this.discontinued.setTime(discontinued);
-		}
+	public void setDiscontinued(DateTime discontinued) {
+		this.discontinued = discontinued;
 	}
 
 	/* (non-Javadoc)
