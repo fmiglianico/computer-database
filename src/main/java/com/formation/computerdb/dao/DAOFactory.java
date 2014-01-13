@@ -9,8 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.formation.computerdb.common.RC;
-import com.jolbox.bonecp.BoneCP;
-import com.jolbox.bonecp.BoneCPConfig;
+import com.jolbox.bonecp.BoneCPDataSource;
 
 /**
  * DAO Factory
@@ -23,15 +22,10 @@ public class DAOFactory {
 	
 	private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
 	
-	private BoneCP connectionPool = null;
 	private static ThreadLocal<Connection> thConn = new ThreadLocal<Connection>();
-
-	//Static final attributes
-	private static final String JDBC_URL = "jdbc:mysql://127.0.0.1:3306/";
-	private static final String DB_NAME = "computer-database-db?zeroDateTimeBehavior=convertToNull";
-	private static final String DB_USER = "root";
-	private static final String DB_PASSWORD = "";
-	private static final int MAX_CONN_PER_PARTITION = 5;
+	
+	@Autowired
+	private BoneCPDataSource ds;
 	
 	// The DAOs
 	@Autowired
@@ -42,31 +36,6 @@ public class DAOFactory {
 	
 	@Autowired
 	private DBLogDAO dbLogDAO;
-	
-	/**
-	 * Initializes the connection pool and the DAOs
-	 */
-	private DAOFactory() {
-		
-		BoneCPConfig config = new BoneCPConfig();
-		config.setJdbcUrl(JDBC_URL + DB_NAME);
-		config.setUsername(DB_USER);
-		config.setPassword(DB_PASSWORD);
-		config.setMaxConnectionsPerPartition(MAX_CONN_PER_PARTITION);
-		
-
-		try {
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-		} catch (Exception e) {
-			log.error("Error while loading JDBC driver : " + e.getMessage(), e);
-		}
-		
-		try {
-			connectionPool = new BoneCP(config);
-		} catch (SQLException e1) {
-			log.error("Error while init of connection pool : " + e1.getMessage(), e1);
-		}
-	}
 	
 	/**
 	 * 
@@ -86,15 +55,15 @@ public class DAOFactory {
 	 */
 	public RC setConn() {
 		
-		if(connectionPool == null) {
-			log.error("Connection pool is null");
+		if(ds == null) {
+			log.error("DataSource is null");
 			return RC.FAILED;
 		}
 		
 		Connection conn = null;
 		
 		try {
-			conn = connectionPool.getConnection();
+			conn = ds.getConnection();
 			thConn.set(conn);
 		} catch (SQLException e1) {
 			log.error("Error while trying to fetch a connection : " + e1.getMessage());
@@ -106,6 +75,12 @@ public class DAOFactory {
 			conn.setAutoCommit(false);
 		} catch (SQLException e) {
 			log.error("Error while setting auto-commit to false : " + e.getMessage(), e);
+			try {
+				conn.close();
+				conn = null;
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			return RC.FAILED;
 		}
 		

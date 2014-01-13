@@ -1,5 +1,7 @@
 package com.formation.computerdb.mapper;
 
+import java.util.ResourceBundle;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.dto.ComputerDto;
 import com.formation.computerdb.service.DataService;
-import com.formation.computerdb.util.ComputerDBCatalog;
 
 /**
  * Mapper @Computer/@ComputerDto
@@ -22,6 +23,8 @@ public class ComputerMapper {
 	@Autowired
 	private DataService ds;
 	
+	private final static ResourceBundle bundle = ResourceBundle.getBundle("messages");
+	
 	private final static Logger log = LoggerFactory.getLogger(ComputerMapper.class);
 	
 	/**
@@ -31,14 +34,22 @@ public class ComputerMapper {
 	 */
 	public static ComputerDto toDto(Computer computer) {
 		
+		if(bundle == null) {
+			log.error("Cannot find resource bundle");
+			return null;
+		}
+		
+		String pattern = bundle.getString("date.format");
+		
 		ComputerDto cdto = new ComputerDto();
 		
 		cdto.setId(computer.getId());
 		cdto.setName(computer.getName());
+		
 		if(computer.getIntroduced() != null)
-			cdto.setIntroduced(computer.getIntroduced().toString(ComputerDBCatalog.STORED_DATE_PATTERN.getValue()));
+			cdto.setIntroduced(computer.getIntroduced().toString(pattern));
 		if(computer.getDiscontinued() != null)
-			cdto.setDiscontinued(computer.getDiscontinued().toString(ComputerDBCatalog.STORED_DATE_PATTERN.getValue()));
+			cdto.setDiscontinued(computer.getDiscontinued().toString(pattern));
 		cdto.setCompanyId(computer.getCompany() == null ? null : computer.getCompany().getId());
 		
 		return cdto;
