@@ -1,12 +1,13 @@
 <%@ tag %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib uri="WEB-INF/cdblib" prefix="cdblib" %>
 
 <%@ attribute name="wrap" required="true" type="com.formation.computerdb.domain.Page" %>
 
 <div id="compPerPage">
-	<label>Computers per page:</label>
+	<label><spring:message code="dashboard.row.limit.label"/></label>
 	<c:choose>
 		<c:when test="${wrap.nbRows != 15}">
 				<cdblib:link tagclass="btn btn-sm btn-default" nbrows="15" currpage="" wrap="${wrap}">15</cdblib:link>

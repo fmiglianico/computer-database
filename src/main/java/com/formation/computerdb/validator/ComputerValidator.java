@@ -26,6 +26,10 @@ public class ComputerValidator implements Validator {
 
 	private static final SimpleDateFormat sdf = new SimpleDateFormat(ComputerDBCatalog.STORED_DATE_PATTERN.getValue());
 	
+	private static Calendar lastValidDate = null;
+	private static Calendar firstValidDate = null;
+	
+	
 	@Autowired
 	private DataService ds;
 
@@ -40,15 +44,17 @@ public class ComputerValidator implements Validator {
 	@Override
 	public void validate(Object obj, Errors e) {
 		
-		ValidationUtils.rejectIfEmptyOrWhitespace(e, "name", "name.empty");
+		ValidationUtils.rejectIfEmptyOrWhitespace(e, "name", "form.name.empty");
 		
 		ComputerDto cdto = (ComputerDto)obj;
 		
-		// Verify that dates are in range
-		Calendar lastValidDate = Calendar.getInstance();
-		lastValidDate.set(2100, 1, 1);
-		Calendar firstValidDate = Calendar.getInstance();
-		firstValidDate.set(1900, 1, 1);
+		if(lastValidDate == null && firstValidDate == null) {
+			// Verify that dates are in range
+			lastValidDate = Calendar.getInstance();
+			lastValidDate.set(2100, 1, 1);
+			firstValidDate = Calendar.getInstance();
+			firstValidDate.set(1900, 1, 1);
+		}
 		
 			// Introduced date
 		String introduction = cdto.getIntroduced();
@@ -56,10 +62,10 @@ public class ComputerValidator implements Validator {
 			try {
 				Date d = sdf.parse(introduction);
 				if(d.after(lastValidDate.getTime()) || d.before(firstValidDate.getTime())) {
-					e.rejectValue("introduced", "introduced.date.invalid");
+					e.rejectValue("introduced", "form.introduced.date.invalid");
 				}
 			} catch (ParseException e1) {
-				e.rejectValue("introduced", "introduced.date.unparseable");
+				e.rejectValue("introduced", "form.introduced.date.unparseable");
 			}
 		}
 		
@@ -69,10 +75,10 @@ public class ComputerValidator implements Validator {
 			try {
 				Date d = sdf.parse(discontinued);
 				if(d.after(lastValidDate.getTime()) || d.before(firstValidDate.getTime())) {
-					e.rejectValue("discontinued", "discontinued.date.invalid");
+					e.rejectValue("discontinued", "form.discontinued.date.invalid");
 				}
 			} catch (ParseException e1) {
-				e.rejectValue("discontinued", "discontinued.date.unparseable");
+				e.rejectValue("discontinued", "form.discontinued.date.unparseable");
 			}
 		}
 		
@@ -81,7 +87,7 @@ public class ComputerValidator implements Validator {
 		if(companyId != null) {
 			Company company = ds.getCompany(companyId.intValue());
 			if(company == null)
-				e.rejectValue("companyId", "company.not.found");
+				e.rejectValue("companyId", "form.company.not.found");
 		}
 		
 	}

@@ -1,11 +1,11 @@
 package com.formation.computerdb.dto;
 
 
+
 /**
  * Class representing a Computer as a Data Transport Object
  * @author F. Miglianico
  */
-
 public class ComputerDto {
 	
 	/**

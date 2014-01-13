@@ -110,3 +110,17 @@ th#company {
 th#actionbuttons {
 	width: 20%;
 }
+
+img.img-flag {
+	-webkit-box-shadow: 0 1px 1px rgba(255,255, 255,0.075);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.075);
+	display: inline-block;
+	height: auto;
+	max-width: 100%;
+	padding: 1px;
+	line-height: 1.428571429;
+	background-color: #cccccc;
+	border: 1px solid #cccccc;
+	border-radius: 2px;
+	margin-top: 15px;
+}

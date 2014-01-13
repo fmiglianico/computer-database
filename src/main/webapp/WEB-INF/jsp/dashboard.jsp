@@ -1,13 +1,14 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="WEB-INF/cdblib" prefix="cdblib" %>
 <%@ taglib prefix="custom" tagdir="/WEB-INF/tags" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 
 <jsp:include page="include/header.jsp" />
 
 <div class="container theme-showcase">
 	
 	<div class="page-header">
-		<h1>${wrap.nbComputers} Computers found</h1>
+		<h1><spring:message code="dashboard.title" arguments="${wrap.nbComputers}"/></h1>
 	</div>
 	
 	<c:if test="${not empty message}">
@@ -20,21 +21,23 @@
 	</c:if>
 	
 	<div id="actions">
-		<form action="" method="GET" class="form-inline" role="form">
+		<form action="" method="GET" class="form-inline">
 			<div class="form-group">
 				<label class="sr-only" for="search">Search</label>
+				<spring:message code="dashboard.search.placeholder" var="searchPlaceholder"/>
 				<input type="search" id="searchbox" name="search"
-					value="${wrap.search}" placeholder="Search name" class="form-control">
+					value="${wrap.search}" placeholder="${searchPlaceholder}" class="form-control">
 				<input type="hidden" name="nbrows" value="${wrap.nbRows}"/>
 			</div>
 			<div class="form-group">
+				<spring:message code="dashboard.search.button" var="searchButton"/>
 				<input type="submit" id="searchsubmit"
-					value="Filter by name"
+					value="${searchButton}"
 					class="btn btn-primary" />
 			</div>
 		</form>
 		<cdblib:limitsetter wrap="${wrap}"/>
-		<a class="btn btn-primary" id="add" href="addComputer">Add Computer</a>
+		<a class="btn btn-primary" id="add" href="addComputer"><spring:message code="dashboard.add.computer.button"/></a>
 	</div>
 	<p/>
 		<table class="computers table table-bordered table-striped">
@@ -44,28 +47,28 @@
 					<!-- Table header for Computer Name -->
 					<th id="name">
 						<cdblib:link wrap="${wrap}" orderby="name">
-							Computer Name
+							<spring:message code="dashboard.table.computer.name"/>
 						</cdblib:link>
 					</th>
 					<th id="intro">
 						<cdblib:link wrap="${wrap}" orderby="introduced">
-							Introduced Date
+							<spring:message code="dashboard.table.introduced"/>
 						</cdblib:link>
 					</th>
 					<!-- Table header for Discontinued Date -->
 					<th id="disco">
 						<cdblib:link wrap="${wrap}" orderby="discontinued">
-							Discontinued Date
+							<spring:message code="dashboard.table.discontinued"/>
 						</cdblib:link>
 					</th>
 					<!-- Table header for Company -->
 					<th id="company">
 						<cdblib:link wrap="${wrap}" orderby="company">
-							Company
+							<spring:message code="dashboard.table.company"/>
 						</cdblib:link>
 					</th>
 					<!-- Table header for Buttons -->
-					<th id="actionbuttons">Actions</th>
+					<th id="actionbuttons"><spring:message code="dashboard.table.actions"/></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -76,8 +79,8 @@
 						<td>${ c.displayedDiscontinued}</td>
 						<td>${ c.company.name }</td>
 						<td>
-							<a class="btn btn-sm btn-default" id="edit" href="editComputer?id=${ c.id }">Edit</a>
-							<a class="btn btn-sm btn-default" id="delete" href="deleteComputer?id=${ c.id }">Delete</a>
+							<a class="btn btn-sm btn-default" id="edit" href="editComputer?id=${ c.id }"><spring:message code="dashboard.table.actions.edit"/></a>
+							<a class="btn btn-sm btn-default" id="delete" href="deleteComputer?id=${ c.id }"><spring:message code="dashboard.table.actions.delete"/></a>
 						</td>
 					</tr>
    			 </c:forEach>
