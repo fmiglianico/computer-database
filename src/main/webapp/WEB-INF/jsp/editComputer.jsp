@@ -23,22 +23,25 @@
 							<form:input type="text" cssClass="form-control" name="name"
 								placeholder="${namePlaceholder}" path="name"/>
 						</div>
-						<div class="col-sm-2 form-control-static">
+						<div class="col-sm-3 form-control-static">
 							<form:errors path="name" cssClass="text-danger" />
 						</div>
 					</div>
 				</div>
 			</spring:bind>
+			
+			<!-- Date Placeholder -->
+			<spring:message code="form.date.default" var="datePlaceHolder" />
 
 			<spring:bind path="introduced">
 				<div class="clearfix ${status.error ? 'has-error' : ''}">
 					<div class="form-group">
 						<label for="introduced" class="col-sm-2 control-label"><spring:message code="form.introduced.label"/></label>
 						<div class="col-sm-6">
-							<form:input type="date" cssClass="form-control" name="introduced"
-								pattern="dd-MM-YYYY" path="introduced"/>
+							<form:input type="text" cssClass="form-control" name="introduced"
+								 path="introduced" placeholder="${datePlaceHolder}"/>
 						</div>
-						<div class="col-sm-2 form-control-static">
+						<div class="col-sm-3 form-control-static">
 							<form:errors path="introduced" cssClass="text-danger" />
 						</div>
 					</div>
@@ -50,10 +53,10 @@
 					<div class="form-group">
 						<label for="discontinued" class="col-sm-2 control-label"><spring:message code="form.discontinued.label"/></label>
 						<div class="col-sm-6">
-							<form:input type="date" cssClass="form-control" name="discontinued"
-								pattern="dd-MM-YYYY" path="discontinued"/>
+							<form:input type="text" cssClass="form-control" name="discontinued"
+								path="discontinued" placeholder="${datePlaceHolder}"/>
 						</div>
-						<div class="col-sm-2 form-control-static">
+						<div class="col-sm-3 form-control-static">
 							<form:errors path="discontinued" cssClass="text-danger" />
 						</div>
 					</div>
@@ -70,7 +73,7 @@
 								<form:options items="${companies}" itemValue="id" itemLabel="name"/>
 							</form:select>
 						</div>
-						<div class="col-sm-2 form-control-static">
+						<div class="col-sm-3 form-control-static">
 							<form:errors path="companyId" cssClass="text-danger" />
 						</div>
 					</div>

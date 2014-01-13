@@ -3,6 +3,8 @@ package com.formation.computerdb.mapper;
 import java.util.ResourceBundle;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,14 +73,16 @@ public class ComputerMapper {
 
 		String sIntroduced = cdto.getIntroduced();
 		String sDiscontinued = cdto.getDiscontinued();
+		
+		DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern(bundle.getString("date.format")).toFormatter();
 
 		try {
 			if(sIntroduced != null && !sIntroduced.isEmpty()) {
-				computer.setIntroduced(DateTime.parse(sIntroduced)); // Default parser: yyyy-MM-dd @see DateTimeFormatter dateTimeParser()
+				computer.setIntroduced(DateTime.parse(sIntroduced, formatter));
 			}
 	
 			if(sDiscontinued != null && !sDiscontinued.isEmpty()) {
-				computer.setDiscontinued(DateTime.parse(sDiscontinued));
+				computer.setDiscontinued(DateTime.parse(sDiscontinued, formatter));
 			}
 		} catch(IllegalArgumentException e) {
 			log.error("Cannot parse date : " + e.getMessage(), e);
