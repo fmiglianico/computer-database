@@ -7,11 +7,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.formation.computerdb.dao.BaseDAO;
 import com.formation.computerdb.dao.CompanyDAO;
-import com.formation.computerdb.dao.DAOFactory;
 import com.formation.computerdb.domain.Company;
 
 /**
@@ -20,10 +24,10 @@ import com.formation.computerdb.domain.Company;
  *
  */
 @Repository
-public class CompanyDAOImpl implements CompanyDAO {
+@Transactional(readOnly=true)
+public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
 	
-	@Autowired
-	private DAOFactory daoFactory;
+	private static Logger log = LoggerFactory.getLogger(CompanyDAOImpl.class);
 	
 	protected CompanyDAOImpl() {
 	}
@@ -33,7 +37,11 @@ public class CompanyDAOImpl implements CompanyDAO {
 	 */
 	public List<Company> getAll() {
 		
-		Connection conn = daoFactory.getConn();
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return null;
+		}
 
 		List<Company> companies = new ArrayList<Company>();
 		ResultSet rs = null;
@@ -50,14 +58,13 @@ public class CompanyDAOImpl implements CompanyDAO {
 				companies.add(mapCompany(rs));
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not retrieve companies", e);
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				System.err.println("Error in finally: " + e.getMessage());
-				e.printStackTrace();
+				throw new CleanupFailureDataAccessException("Could not close connection", e);
 			}
 		}
 		return companies;
@@ -69,7 +76,11 @@ public class CompanyDAOImpl implements CompanyDAO {
 	 */
 	public Company get(int id) {
 		
-		Connection conn = daoFactory.getConn();
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return null;
+		}
 
 		Company company = null;
 		ResultSet rs = null;
@@ -85,14 +96,13 @@ public class CompanyDAOImpl implements CompanyDAO {
 				company = mapCompany(rs);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not retrieve company", e);
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				System.err.println("Error in finally: " + e.getMessage());
-				e.printStackTrace();
+				throw new CleanupFailureDataAccessException("Could not close connection", e);
 			}
 		}
 
@@ -112,7 +122,7 @@ public class CompanyDAOImpl implements CompanyDAO {
 			company.setName(resultSet.getString("c.name"));
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not map resultSet with Company", e);
 		}
 
 		return company;

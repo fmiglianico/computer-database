@@ -19,8 +19,6 @@ public interface DataService {
 
 	public abstract void fill(Page page);
 
-	public abstract int countComputers(String search);
-
 	public abstract List<Company> getAllCompanies();
 
 	public abstract Company getCompany(int id);

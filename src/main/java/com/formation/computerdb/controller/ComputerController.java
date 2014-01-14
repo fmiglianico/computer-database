@@ -60,9 +60,6 @@ public class ComputerController {
 			// sort
 		page.setOrderBy(OrderByColumn.get(orderBy, dir));
 		
-			// number of computers
-		page.setNbComputers(ds.countComputers(page.getSearch()));
-		
 			// current page
 		if(sPage != null && !sPage.isEmpty())
 			page.setCurrPage(Integer.valueOf(sPage));

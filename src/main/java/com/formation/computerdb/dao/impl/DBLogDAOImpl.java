@@ -7,11 +7,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Repository;
 
 import com.formation.computerdb.common.DBLogActionType;
-import com.formation.computerdb.dao.DAOFactory;
+import com.formation.computerdb.dao.BaseDAO;
 import com.formation.computerdb.dao.DBLogDAO;
 import com.formation.computerdb.domain.DBLog;
 
@@ -22,19 +26,24 @@ import com.formation.computerdb.domain.DBLog;
  *
  */
 @Repository
-public class DBLogDAOImpl implements DBLogDAO {
+public class DBLogDAOImpl extends BaseDAO implements DBLogDAO {
 	
-	@Autowired
-	private DAOFactory daoFactory;
+	private final static Logger log = LoggerFactory.getLogger(DBLogDAOImpl.class);
 	
 	/**
 	 * Get a log
 	 */
 	public DBLog get(int id) {
+		
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return null;
+		}
+		
 		DBLog dbLog = null;
 		ResultSet rs = null;
 		
-		Connection conn = daoFactory.getConn();
 
 		try {
 			StringBuilder query = new StringBuilder("SELECT d.action, d.date, d.description FROM db_log AS d WHERE d.id = ").append(id);
@@ -47,14 +56,13 @@ public class DBLogDAOImpl implements DBLogDAO {
 				dbLog = mapDBLog(rs);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not retrieve log", e);
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				System.err.println("Error in finally: " + e.getMessage());
-				e.printStackTrace();
+				throw new CleanupFailureDataAccessException("Could not close connection", e);
 			}
 		}
 
@@ -64,23 +72,31 @@ public class DBLogDAOImpl implements DBLogDAO {
 	/**
 	 * Persist a log in DB
 	 */
-	public void create(DBLog dbLog) throws SQLException {
+	public void create(DBLog dbLog) {
 		
-		Connection conn = daoFactory.getConn();
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return;
+		}
 		
 		String query = "INSERT INTO db_log (action, date, description) VALUES (?, ?, ?)";
 		
-		PreparedStatement statement = conn.prepareStatement(query);
-		statement.setString(1, dbLog.getActionType().toString());
-		
-		if(dbLog.getDate() != null)
-			statement.setTimestamp(2, new java.sql.Timestamp(dbLog.getDate().getMillis()));
-		else
-			statement.setNull(2, java.sql.Types.TIMESTAMP);
-		
-		statement.setString(3, dbLog.getDescription());
-		
-		statement.executeUpdate();
+		try {
+			PreparedStatement statement = conn.prepareStatement(query);
+			statement.setString(1, dbLog.getActionType().toString());
+			
+			if(dbLog.getDate() != null)
+				statement.setTimestamp(2, new java.sql.Timestamp(dbLog.getDate().getMillis()));
+			else
+				statement.setNull(2, java.sql.Types.TIMESTAMP);
+			
+			statement.setString(3, dbLog.getDescription());
+			
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			throw new DataIntegrityViolationException("Could not insert log in DBLog.create", e);
+		}
 	}
 	
 	/**
@@ -100,7 +116,7 @@ public class DBLogDAOImpl implements DBLogDAO {
 			dbLog.setDescription(resultSet.getString("d.description"));
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not map resultSet with DBLog", e);
 		}
 
 		return dbLog;

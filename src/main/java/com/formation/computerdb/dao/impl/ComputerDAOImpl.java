@@ -12,12 +12,16 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.CleanupFailureDataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.formation.computerdb.common.OrderByColumn;
+import com.formation.computerdb.dao.BaseDAO;
 import com.formation.computerdb.dao.ComputerDAO;
-import com.formation.computerdb.dao.DAOFactory;
 import com.formation.computerdb.domain.Company;
 import com.formation.computerdb.domain.Computer;
 import com.formation.computerdb.domain.Page;
@@ -28,12 +32,10 @@ import com.formation.computerdb.domain.Page;
  *
  */
 @Repository
-public class ComputerDAOImpl implements ComputerDAO {
+@Transactional(readOnly=true)
+public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 	
 	private static Logger log = LoggerFactory.getLogger(ComputerDAOImpl.class);
-	
-	@Autowired
-	private DAOFactory daoFactory;
 	
 	protected ComputerDAOImpl() {
 	}
@@ -43,11 +45,15 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * @param id the id
 	 */
 	public Computer get(int id) {
+		
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return null;
+		}
 
 		Computer computer = null;
 		ResultSet rs = null;
-		
-		Connection conn = daoFactory.getConn();
 
 		try {
 
@@ -66,14 +72,13 @@ public class ComputerDAOImpl implements ComputerDAO {
 				computer = mapComputer(rs);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not retrieve computer", e);
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException e) {
-				log.error("Error in finally: " + e.getMessage());
-				e.printStackTrace();
+				throw new CleanupFailureDataAccessException("Could not close connection", e);
 			}
 		}
 
@@ -83,51 +88,77 @@ public class ComputerDAOImpl implements ComputerDAO {
 	/**
 	 * Create a computer in DB
 	 */
-	public void create(Computer computer) throws SQLException{
+	@Transactional(readOnly=false)
+	public void create(Computer computer) {
 		
-		Connection conn = daoFactory.getConn();
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return;
+		}
 
 		String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
 		
-		PreparedStatement statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-		statement.setString(1, computer.getName());
-		if(computer.getCompany() != null)
-			statement.setLong(2, computer.getCompany().getId());
-		else
-			statement.setNull(2, java.sql.Types.BIGINT);
 		
-		if(computer.getIntroduced() != null)
-			statement.setTimestamp(3, new Timestamp(computer.getIntroduced().getMillis()));
-		else
-			statement.setNull(3, java.sql.Types.TIMESTAMP);
+		PreparedStatement statement = null;
+		ResultSet rs = null;
 		
-		if(computer.getDiscontinued() != null)
-			statement.setTimestamp(4, new Timestamp(computer.getDiscontinued().getMillis()));
-		else
-			statement.setNull(4, java.sql.Types.TIMESTAMP);
-		
-		statement.executeUpdate();
-		
-		ResultSet rs = statement.getGeneratedKeys();
-		Long id = null;
-		
-		if (rs.next()) {
-	        id = rs.getLong(1);
-	        computer.setId(id);
-	    } else {
-	    	log.error("Could not retrieve id after creating a computer");
-	    }
-	    rs.close();
-	    rs = null;
+		try {
+			statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+			
+			statement.setString(1, computer.getName());
+			if(computer.getCompany() != null)
+				statement.setLong(2, computer.getCompany().getId());
+			else
+				statement.setNull(2, java.sql.Types.BIGINT);
+			
+			if(computer.getIntroduced() != null)
+				statement.setTimestamp(3, new Timestamp(computer.getIntroduced().getMillis()));
+			else
+				statement.setNull(3, java.sql.Types.TIMESTAMP);
+			
+			if(computer.getDiscontinued() != null)
+				statement.setTimestamp(4, new Timestamp(computer.getDiscontinued().getMillis()));
+			else
+				statement.setNull(4, java.sql.Types.TIMESTAMP);
+			
+			statement.executeUpdate();
+			
+			rs = statement.getGeneratedKeys();
+			Long id = null;
+			
+			if (rs.next()) {
+		        id = rs.getLong(1);
+		        computer.setId(id);
+		    } else {
+		    	log.error("Could not retrieve id after creating a computer");
+		    }
+		} catch (SQLException e) {
+			throw new DataIntegrityViolationException("Could not create computer", e);
+		} finally {
+			try {
+				if(rs != null)
+					rs.close();
+			} catch (SQLException e1) {
+				throw new CleanupFailureDataAccessException("Could not close connection", e1);
+			}
+		    rs = null;
+		}
+	    
 	}
 	
 	/**
 	 * Updates the computer in DB.
 	 * The id needs to be set.
 	 */
-	public void update(Computer computer) throws SQLException {
-
-		Connection conn = daoFactory.getConn();
+	@Transactional(readOnly=false)
+	public void update(Computer computer) {
+		
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return;
+		}
 		
 		if(computer.getId() == null) {
 			log.error("Trying to update a computer without id : " + computer.toString());
@@ -138,43 +169,57 @@ public class ComputerDAOImpl implements ComputerDAO {
 		StringBuilder query = new StringBuilder("UPDATE computer SET name = ?, company_id = ?, introduced = ?, discontinued = ? ");
 		query.append("WHERE id = ").append(computer.getId());
 		
-		// Create prepared statement
-		PreparedStatement statement = conn.prepareStatement(query.toString());
-		statement.setString(1, computer.getName());
-		
-		// Set variables
-		if(computer.getCompany() != null)
-			statement.setLong(2, computer.getCompany().getId());
-		else
-			statement.setNull(2, java.sql.Types.BIGINT);
-
-		if(computer.getIntroduced() != null)
-			statement.setTimestamp(3, new Timestamp(computer.getIntroduced().getMillis()));
-		else
-			statement.setNull(3, java.sql.Types.TIMESTAMP);
-		
-		if(computer.getDiscontinued() != null)
-			statement.setTimestamp(4, new Timestamp(computer.getDiscontinued().getMillis()));
-		else
-			statement.setNull(4, java.sql.Types.TIMESTAMP);
+		try {
+			// Create prepared statement
+			PreparedStatement statement = conn.prepareStatement(query.toString());
+			statement.setString(1, computer.getName());
+			
+			// Set variables
+			if(computer.getCompany() != null)
+				statement.setLong(2, computer.getCompany().getId());
+			else
+				statement.setNull(2, java.sql.Types.BIGINT);
 	
-		
-		// Execute query
-		statement.executeUpdate();
+			if(computer.getIntroduced() != null)
+				statement.setTimestamp(3, new Timestamp(computer.getIntroduced().getMillis()));
+			else
+				statement.setNull(3, java.sql.Types.TIMESTAMP);
+			
+			if(computer.getDiscontinued() != null)
+				statement.setTimestamp(4, new Timestamp(computer.getDiscontinued().getMillis()));
+			else
+				statement.setNull(4, java.sql.Types.TIMESTAMP);
+			
+			// Execute query
+			statement.executeUpdate();
+			
+		} catch(SQLException e) {
+			throw new DataIntegrityViolationException("Could not create computer", e);
+		}
 	}
 	
 	/**
 	 * Delete computer with id set as parameter
 	 * @param id the id
 	 */
-	public void delete(int id) throws SQLException {
+	@Transactional(readOnly=false)
+	public void delete(int id) {
 		
-		Connection conn = daoFactory.getConn();
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return;
+		}
 			
 		String query = "DELETE FROM computer WHERE id = " + id;
 
-		Statement statement = conn.createStatement();
-		statement.executeUpdate(query.toString());
+		Statement statement;
+		try {
+			statement = conn.createStatement();
+			statement.executeUpdate(query.toString());
+		} catch (SQLException e) {
+			throw new DataAccessResourceFailureException("Could not delete computer", e);
+		}
 	}
 
 	/**
@@ -182,7 +227,11 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 */
 	public void fill(Page page) {
 		
-		Connection conn = daoFactory.getConn();
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return;
+		}
 
 		List<Computer> computers = new ArrayList<Computer>();
 		ResultSet rs = null;
@@ -230,14 +279,13 @@ public class ComputerDAOImpl implements ComputerDAO {
 				computers.add(mapComputer(rs));
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not retrieve computers to fill page", e);
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
-			} catch (SQLException e) {
-				log.error("Error in finally: " + e.getMessage());
-				e.printStackTrace();
+			} catch (SQLException e1) {
+				throw new CleanupFailureDataAccessException("Could not close connection", e1);
 			}
 		}
 		
@@ -250,11 +298,15 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * If search is empty, counts all the computers
 	 */
 	public int count(String search) {
+		
+		Connection conn = getConnection();
+		if(conn == null) {
+			log.error("Cannot retrieve connection");
+			return 0;
+		}
 
 		ResultSet rs = null;
 		Long count = null;
-		
-		Connection conn = daoFactory.getConn();
 
 		try {
 
@@ -281,14 +333,13 @@ public class ComputerDAOImpl implements ComputerDAO {
 				count = rs.getLong(1);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not count computers to fill page", e);
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
-			} catch (SQLException e) {
-				log.error("Error in finally: " + e.getMessage());
-				e.printStackTrace();
+			} catch (SQLException e1) {
+				throw new CleanupFailureDataAccessException("Could not close connection", e1);
 			}
 		}
 		return (count == null) ? 0 : count.intValue();
@@ -324,7 +375,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 			computer.setCompany(company);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DataRetrievalFailureException("Could not map resultSet with Computer", e);
 		}
 
 		return computer;
