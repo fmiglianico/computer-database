@@ -37,6 +37,10 @@
 	<!-- support JSR303 annotation if JSR 303 validation present on classpath -->
 
 	<mvc:annotation-driven />
+	
+	<!-- Static resources -->
+	
+	<mvc:resources mapping="/static/**" location="/static/" />
 
 	<!-- Spring internationalization feature -->
 
