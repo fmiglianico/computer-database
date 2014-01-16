@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.formation</groupId>
+		<artifactId>computer-database</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
+
+	<name>computer-database-webapp</name>
+	<artifactId>computer-database-webapp</artifactId>
+	<packaging>war</packaging>
+
+	<dependencies>
+
+		<!-- Core dependencies -->
+		<dependency>
+			<groupId>com.formation</groupId>
+			<artifactId>computer-database-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Service dependencies -->
+		<dependency>
+			<groupId>com.formation</groupId>
+			<artifactId>computer-database-service</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Binding dependencies -->
+		<dependency>
+			<groupId>com.formation</groupId>
+			<artifactId>computer-database-binding</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Spring Framework dependencies -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Form validator dependencies -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
+		<!-- JSTL dependencies -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Joda Time - JSP tags -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time-jsptags</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+
+
+	</dependencies>
+
+	<build>
+
+		<finalName>${project.artifactId}-${project.version}</finalName>
+		<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+		<directory>${project.basedir}/target</directory>
+		<outputDirectory>${project.build.directory}/classes</outputDirectory>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
