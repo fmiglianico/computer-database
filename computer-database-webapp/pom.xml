@@ -15,25 +15,16 @@
 
 	<dependencies>
 
-		<!-- Core dependencies -->
-		<dependency>
-			<groupId>com.formation</groupId>
-			<artifactId>computer-database-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
 		<!-- Service dependencies -->
 		<dependency>
 			<groupId>com.formation</groupId>
 			<artifactId>computer-database-service</artifactId>
-			<scope>compile</scope>
 		</dependency>
 
 		<!-- Binding dependencies -->
 		<dependency>
 			<groupId>com.formation</groupId>
 			<artifactId>computer-database-binding</artifactId>
-			<scope>compile</scope>
 		</dependency>
 
 		<!-- Spring Framework dependencies -->
@@ -44,7 +35,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Form validator dependencies -->

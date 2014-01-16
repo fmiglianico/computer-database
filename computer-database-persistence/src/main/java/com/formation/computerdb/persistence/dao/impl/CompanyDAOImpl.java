@@ -1,22 +1,14 @@
 package com.formation.computerdb.persistence.dao.impl;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.CleanupFailureDataAccessException;
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.formation.computerdb.core.domain.Company;
 import com.formation.computerdb.persistence.dao.BaseDAO;
 import com.formation.computerdb.persistence.dao.CompanyDAO;
+import com.formation.computerdb.persistence.mapper.CompanyRowMapper;
 
 
 /**
@@ -28,7 +20,7 @@ import com.formation.computerdb.persistence.dao.CompanyDAO;
 @Transactional(readOnly=true)
 public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
 	
-	private static Logger log = LoggerFactory.getLogger(CompanyDAOImpl.class);
+	//private static Logger log = LoggerFactory.getLogger(CompanyDAOImpl.class);
 	
 	protected CompanyDAOImpl() {
 	}
@@ -38,36 +30,10 @@ public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
 	 */
 	public List<Company> getAll() {
 		
-		Connection conn = getConnection();
-		if(conn == null) {
-			log.error("Cannot retrieve connection");
-			return null;
-		}
-
-		List<Company> companies = new ArrayList<Company>();
-		ResultSet rs = null;
+		String query = "SELECT company.id, company.name FROM company";
 		
-		try {
-
-			String query = "SELECT c.id, c.name FROM company AS c ";
-
-			Statement statement = conn.createStatement();
-			rs = statement.executeQuery(query.toString());
-
-			// Traitement a faire ici sur le resultset
-			while(rs.next())
-				companies.add(mapCompany(rs));
-
-		} catch (SQLException e) {
-			throw new DataRetrievalFailureException("Could not retrieve companies", e);
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				throw new CleanupFailureDataAccessException("Could not close connection", e);
-			}
-		}
+		List<Company> companies = jdbcTemplate.query(query, new CompanyRowMapper());
+			
 		return companies;
 	}
 
@@ -76,56 +42,9 @@ public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
 	 * @param id the id
 	 */
 	public Company get(int id) {
-		
-		Connection conn = getConnection();
-		if(conn == null) {
-			log.error("Cannot retrieve connection");
-			return null;
-		}
 
-		Company company = null;
-		ResultSet rs = null;
+		String query = new StringBuilder("SELECT company.id, company.name FROM company WHERE company.id = ").append(id).toString();
 
-		try {
-			StringBuilder query = new StringBuilder("SELECT c.id, c.name FROM company AS c WHERE c.id = ").append(id);
-
-			Statement statement = conn.createStatement();
-			rs = statement.executeQuery(query.toString());
-
-			// Traitement a faire ici sur le resultset
-			if(rs != null && rs.next())
-				company = mapCompany(rs);
-
-		} catch (SQLException e) {
-			throw new DataRetrievalFailureException("Could not retrieve company", e);
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				throw new CleanupFailureDataAccessException("Could not close connection", e);
-			}
-		}
-
-		return company;
-	}
-
-	/**
-	 * Creates a company from a resultset
-	 * @param resultSet the resultset
-	 * @return the company
-	 */
-	private Company mapCompany( ResultSet resultSet ) {
-		Company company = new Company();
-
-		try {
-			company.setId(resultSet.getLong("c.id"));
-			company.setName(resultSet.getString("c.name"));
-
-		} catch (SQLException e) {
-			throw new DataRetrievalFailureException("Could not map resultSet with Company", e);
-		}
-
-		return company;
+		return jdbcTemplate.queryForObject(query, new CompanyRowMapper());
 	}
 }
