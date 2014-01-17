@@ -19,6 +19,7 @@
 		<hibernate-validator.version>5.0.2.Final</hibernate-validator.version>
 		<joda-time.version>2.3</joda-time.version>
 		<joda-time-jsptags.version>1.1.1</joda-time-jsptags.version>
+		<jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -29,28 +30,28 @@
 				<artifactId>computer-database-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+
 			<!-- Persistence dependendencies -->
 			<dependency>
 				<groupId>com.formation</groupId>
 				<artifactId>computer-database-persistence</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+
 			<!-- Service dependendencies -->
 			<dependency>
 				<groupId>com.formation</groupId>
 				<artifactId>computer-database-service</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+
 			<!-- Binding dependendencies -->
 			<dependency>
 				<groupId>com.formation</groupId>
 				<artifactId>computer-database-binding</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			
+
 			<!-- BoneCP dependencies -->
 			<dependency>
 				<groupId>com.jolbox</groupId>
@@ -71,6 +72,14 @@
 				<artifactId>logback-classic</artifactId>
 				<version>${logback.version}</version>
 			</dependency>
+
+			<!-- Log Spring in SLF4J -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${jcl-over-slf4j.version}</version>
+			</dependency>
+
 
 			<!-- MySQL Connector dependencies -->
 			<dependency>
@@ -94,6 +103,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${springframework.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
 				<artifactId>spring-tx</artifactId>
 				<version>${springframework.version}</version>
 			</dependency>
@@ -111,6 +131,12 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
 				<version>${springframework.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
