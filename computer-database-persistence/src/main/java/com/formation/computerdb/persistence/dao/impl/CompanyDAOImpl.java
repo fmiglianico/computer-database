@@ -43,8 +43,8 @@ public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
 	 */
 	public Company get(int id) {
 
-		String query = new StringBuilder("SELECT company.id, company.name FROM company WHERE company.id = ").append(id).toString();
+		String query = new StringBuilder("SELECT company.id, company.name FROM company WHERE company.id = ?").toString();
 
-		return jdbcTemplate.queryForObject(query, new CompanyRowMapper());
+		return jdbcTemplate.queryForObject(query, new Object[] {id}, new CompanyRowMapper());
 	}
 }

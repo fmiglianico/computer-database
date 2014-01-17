@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -31,7 +32,8 @@ import com.formation.computerdb.persistence.mapper.ComputerRowMapper;
 @Transactional(readOnly = true)
 public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 
-	//private static Logger log = LoggerFactory.getLogger(ComputerDAOImpl.class);
+	// private static Logger log =
+	// LoggerFactory.getLogger(ComputerDAOImpl.class);
 
 	protected ComputerDAOImpl() {
 	}
@@ -49,9 +51,9 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 				"SELECT computer.id, computer.name, computer.introduced, computer.discontinued, company.id, company.name ");
 		query.append("FROM computer ");
 		query.append("LEFT JOIN company ON computer.company_id = company.id ");
-		query.append("WHERE computer.id = ").append(id);
+		query.append("WHERE computer.id = ?");
 
-		return jdbcTemplate.queryForObject(query.toString(),
+		return jdbcTemplate.queryForObject(query.toString(), new Object[] {id},
 				new ComputerRowMapper());
 	}
 
@@ -60,21 +62,21 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 	 */
 	@Transactional(readOnly = false)
 	public void create(Computer computer) {
-		
+
 		final Computer c = computer;
 
 		final String query = "INSERT INTO computer (name, company_id, introduced, discontinued) VALUES (?, ?, ?, ?)";
-		
+
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		
+
 		jdbcTemplate.update(new PreparedStatementCreator() {
-			
+
 			@Override
 			public PreparedStatement createPreparedStatement(Connection conn)
 					throws SQLException {
-				PreparedStatement ps =
-	                conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-				
+				PreparedStatement ps = conn.prepareStatement(query,
+						Statement.RETURN_GENERATED_KEYS);
+
 				ps.setString(1, c.getName());
 				if (c.getCompany() != null)
 					ps.setLong(2, c.getCompany().getId());
@@ -92,12 +94,12 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 							.getMillis()));
 				else
 					ps.setNull(4, java.sql.Types.TIMESTAMP);
-				
-	            return ps;
+
+				return ps;
 			}
 		}, keyHolder);
-		
-		if(keyHolder.getKey() != null)
+
+		if (keyHolder.getKey() != null)
 			computer.setId(keyHolder.getKey().longValue());
 
 	}
@@ -111,7 +113,7 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 		// Build query
 		StringBuilder query = new StringBuilder(
 				"UPDATE computer SET name = ?, company_id = ?, introduced = ?, discontinued = ? ");
-		query.append("WHERE id = ").append(computer.getId());
+		query.append("WHERE id = ?");
 
 		jdbcTemplate.update(query.toString(), new PreparedStatementSetter() {
 
@@ -126,16 +128,18 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 					ps.setNull(2, java.sql.Types.BIGINT);
 
 				if (computer.getIntroduced() != null)
-					ps.setTimestamp(3, new Timestamp(computer
-							.getIntroduced().getMillis()));
+					ps.setTimestamp(3, new Timestamp(computer.getIntroduced()
+							.getMillis()));
 				else
 					ps.setNull(3, java.sql.Types.TIMESTAMP);
 
 				if (computer.getDiscontinued() != null)
-					ps.setTimestamp(4, new Timestamp(computer
-							.getDiscontinued().getMillis()));
+					ps.setTimestamp(4, new Timestamp(computer.getDiscontinued()
+							.getMillis()));
 				else
 					ps.setNull(4, java.sql.Types.TIMESTAMP);
+				
+				ps.setLong(5, computer.getId());
 
 			}
 		});
@@ -150,16 +154,17 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 	@Transactional(readOnly = false)
 	public void delete(int id) {
 
-		String query = "DELETE FROM computer WHERE id = " + id;
+		String query = "DELETE FROM computer WHERE id = ?";
 
-		jdbcTemplate.update(query);
+		jdbcTemplate.update(query, new Object[] {id});
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void fill(Page page) {
-
+		
+		List<Object> obj = new ArrayList<Object>();
 
 		// Build query, depends on the page parameters
 		StringBuilder query = new StringBuilder(
@@ -171,34 +176,44 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 		String search = page.getSearch();
 
 		if (search != null) {
-			query.append("WHERE computer.name LIKE '%").append(search)
-					.append("%' ");
-			query.append("OR company.name LIKE '%").append(search).append("%' ");
+			query.append("WHERE computer.name LIKE '%?%' ");
+			query.append("OR company.name LIKE '%?%' ");
+
+			obj.add(search);
+			obj.add(search);
+			
 		}
 
 		// Order By parameter
 		OrderByColumn orderBy = page.getOrderBy();
-		if (orderBy != null)
-			query.append("ORDER BY ").append(orderBy.getColNumber())
-					.append(" ").append(orderBy.getDir()).append(" ");
+		if (orderBy != null) {
+			query.append("ORDER BY ? ? ");
+			
+			obj.add(orderBy.getColNumber());
+			obj.add(orderBy.getDir());
+		}
+		
+		
 
 		// Number of rows parameter
 		Integer nbRows = page.getNbRows();
 		if (nbRows != null) {
-			query.append("LIMIT ");
+			query.append("LIMIT ?");
 			Integer currPage = page.getCurrPage();
 			if (currPage != null) {
 				int offset = (currPage - 1) * nbRows;
-				query.append(offset).append(", ");
+				obj.add(offset);
+				query.append(", ?");
 			}
-			query.append(nbRows);
+			obj.add(nbRows);
 		}
 
-		List<Computer> computers = jdbcTemplate.query(query.toString(), new ComputerRowMapper());
+		List<Computer> computers = jdbcTemplate.query(query.toString(), obj.toArray(),
+				new ComputerRowMapper());
 
 		// Store the resulting list of computers in the page
 		page.setList(computers);
-		
+
 	}
 
 	/**
@@ -206,6 +221,8 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 	 * empty, counts all the computers
 	 */
 	public int count(String search) {
+
+		List<Object> obj = new ArrayList<Object>();
 
 		// Build query
 		StringBuilder query = new StringBuilder();
@@ -215,13 +232,15 @@ public class ComputerDAOImpl extends BaseDAO implements ComputerDAO {
 			query.append("SELECT COUNT(cr.id) ");
 			query.append("FROM computer AS cr ");
 			query.append("LEFT JOIN company AS cy ON cr.company_id = cy.id ");
-			query.append("WHERE cr.name LIKE '%").append(search)
-					.append("%' ");
-			query.append("OR cy.name LIKE '%").append(search).append("%'");
+			query.append("WHERE cr.name LIKE '%?%' ");
+			query.append("OR cy.name LIKE '%?%'");
+
+			obj.add(search);
+			obj.add(search);
 		}
 
-		return jdbcTemplate.queryForObject(query.toString(), Integer.class);
-		
+		return jdbcTemplate.queryForObject(query.toString(), obj.toArray(), Integer.class);
+
 	}
 
 }
