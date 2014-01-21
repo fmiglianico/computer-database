@@ -1,13 +1,14 @@
 package com.formation.computerdb.binding.validator;
 
-import java.util.ResourceBundle;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -28,7 +29,9 @@ public class ComputerValidator implements Validator {
 	private static final DateTime firstValidDate = new DateTime(1970, 1, 1, 0, 0, 1);
 	private static final DateTime lastValidDate = new DateTime(2038, 1, 19, 3, 14, 07);
 
-	private final static ResourceBundle bundle = ResourceBundle.getBundle("messages");
+	@Autowired
+	@Qualifier(value = "messageSource")
+	private ResourceBundleMessageSource bundle;
 	
 	private final static Logger log = LoggerFactory.getLogger(ComputerValidator.class);
 	
@@ -51,7 +54,7 @@ public class ComputerValidator implements Validator {
 		ComputerDto cdto = (ComputerDto)obj;
 		
 		if(bundle != null) {
-			DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern(bundle.getString("date.format")).toFormatter();
+			DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern(bundle.getMessage("date.format", null, LocaleContextHolder.getLocale())).toFormatter();
 	
 			// Introduced date
 			String sIntroduced = cdto.getIntroduced();

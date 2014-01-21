@@ -20,13 +20,6 @@
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
 		p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
 
-	<!-- binds messages_xx_XX.properties -->
-
-	<bean id="messageSource"
-		class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basename" value="messages" />
-	</bean>
-
 	<!-- Static resources -->
 
 	<mvc:resources mapping="/static/**" location="/static/" />
