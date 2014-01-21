@@ -7,20 +7,22 @@ package com.formation.computerdb.core.common;
  */
 public enum OrderByColumn {
 
-	COMPUTER_NAME_ASC("computer.name", "asc"),
-	COMPUTER_NAME_DESC("computer.name", "desc"),
-	INTRODUCED_DATE_ASC("computer.introduced", "asc"),
-	INTRODUCED_DATE_DESC("computer.introduced", "desc"),
-	DISCONTINUED_DATE_ASC("computer.discontinued", "asc"),
-	DISCONTINUED_DATE_DESC("computer.discontinued", "desc"),
-	COMPANY_NAME_ASC("computer.company.name", "asc"),
-	COMPANY_NAME_DESC("computer.company.name", "desc");
+	COMPUTER_NAME_ASC("name", "name", "asc"),
+	COMPUTER_NAME_DESC("name", "name", "desc"),
+	INTRODUCED_DATE_ASC("introduced", "introduced", "asc"),
+	INTRODUCED_DATE_DESC("introduced", "introduced", "desc"),
+	DISCONTINUED_DATE_ASC("discontinued", "discontinued", "asc"),
+	DISCONTINUED_DATE_DESC("discontinued", "discontinued", "desc"),
+	COMPANY_NAME_ASC("company.name", "company", "asc"),
+	COMPANY_NAME_DESC("company.name", "company", "desc");
 	
 	private String colName = "";
+	private String colNameShort = "";
 	private String dir = "asc";
 	
-	private OrderByColumn(String colName, String dir) {
+	private OrderByColumn(String colName, String colNameShort, String dir) {
 		this.setColName(colName);
+		this.setColNameShort(colNameShort);
 		this.setDir(dir);
 	}
 
@@ -36,6 +38,20 @@ public enum OrderByColumn {
 	 */
 	private void setColName(String colName) {
 		this.colName = colName;
+	}
+
+	/**
+	 * @return the colNameShort
+	 */
+	public String getColNameShort() {
+		return colNameShort;
+	}
+
+	/**
+	 * @param colNameShort the colNameShort to set
+	 */
+	public void setColNameShort(String colNameShort) {
+		this.colNameShort = colNameShort;
 	}
 
 	/**
@@ -68,7 +84,7 @@ public enum OrderByColumn {
 		OrderByColumn[] list = OrderByColumn.values();
 		
 		for(OrderByColumn col : list) {
-			if(col.getColName().equals(colName) && col.getDir().equals(dir))
+			if(col.getColNameShort().equals(colName) && col.getDir().equals(dir))
 				return col;
 		}
 		return null;
@@ -81,7 +97,7 @@ public enum OrderByColumn {
 	 */
 	public String getDirForCol(String col) {
 		
-		if(this.getColName().equals(col) && this.getDir().equals("asc"))
+		if(this.getColNameShort().equals(col) && this.getDir().equals("asc"))
 			return "desc";
 		
 		return "asc";

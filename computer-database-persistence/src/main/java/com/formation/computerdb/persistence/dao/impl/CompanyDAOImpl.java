@@ -2,9 +2,10 @@ package com.formation.computerdb.persistence.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,10 +38,10 @@ public class CompanyDAOImpl implements CompanyDAO {
 		
 		Session session = sessionFactory.getCurrentSession();
 		
-		Query query = session.createQuery("from Company company");
+		Criteria criteria = session.createCriteria(Company.class);
 		
 		@SuppressWarnings("unchecked")
-		List<Company> companies = query.list();
+		List<Company> companies = criteria.list();
 			
 		return companies;
 	}
@@ -52,7 +53,9 @@ public class CompanyDAOImpl implements CompanyDAO {
 	public Company get(int id) {
 
 		Session session = sessionFactory.getCurrentSession();
+
+		Criteria criteria = session.createCriteria(Company.class).add(Restrictions.eq("id", new Long(id)));
 		
-		return (Company) session.get(Company.class, new Long(id));
+		return (Company) criteria.uniqueResult();
 	}
 }

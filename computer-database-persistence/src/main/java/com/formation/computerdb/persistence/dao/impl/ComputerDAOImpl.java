@@ -2,9 +2,13 @@ package com.formation.computerdb.persistence.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +46,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 		
 		Session session = sessionFactory.getCurrentSession();
 
-		return (Computer) session.get(Computer.class, new Long(id));
+		return (Computer) session.createCriteria(Computer.class).add(Restrictions.idEq(new Long(id))).uniqueResult();
 	}
 
 	/**
@@ -92,47 +96,45 @@ public class ComputerDAOImpl implements ComputerDAO {
 
 		Session session = sessionFactory.getCurrentSession();
 		
-		// Build query, depends on the page parameters
-		StringBuilder query = new StringBuilder("FROM Computer computer ");
+		Criteria criteria = session.createCriteria(Computer.class);
 
 		// Search parameter
 		String search = page.getSearch();
 
 		if (search != null) {
-			query.append("WHERE computer.name LIKE :search ");
-			query.append("OR computer.company.name LIKE :search ");
+			criteria.createAlias("company", "company", JoinType.LEFT_OUTER_JOIN);
 			
+			search = new StringBuilder("%").append(search).append("%").toString();
+			
+			criteria.add(Restrictions.or(Restrictions.like("this.name", search), Restrictions.like("company.name", search)));
 		}
 
 		// Order By parameter
 		OrderByColumn orderBy = page.getOrderBy();
 		if (orderBy != null) {
-			query.append("ORDER BY :col :dir ");
-		}
-		
-		Query q = session.createQuery(query.toString());
-		
-		if(search != null)
-			q.setString("search", "%" + search + "%");
-		
-		if(orderBy != null) {
-			q.setString("col", orderBy.getColName());
-			q.setString("dir", orderBy.getDir());
+			
+			if(search == null && orderBy.getColNameShort().equals("company"))
+				criteria.createAlias("company", "company", JoinType.LEFT_OUTER_JOIN);
+			
+			if(orderBy.getDir().equals("asc"))
+				criteria.addOrder(Order.asc(orderBy.getColName()));
+			else
+				criteria.addOrder(Order.desc(orderBy.getColName()));
 		}
 		
 		// Number of rows parameter
 		Integer nbRows = page.getNbRows();
 		if (nbRows != null) {
-			q.setMaxResults(nbRows);
+			criteria.setMaxResults(nbRows);
 			Integer currPage = page.getCurrPage();
 			if (currPage != null) {
 				int offset = (currPage - 1) * nbRows;
-				q.setFirstResult(offset);
+				criteria.setFirstResult(offset);
 			}
 		}
 
 		@SuppressWarnings("unchecked")
-		List<Computer> computers = q.list();
+		List<Computer> computers = criteria.list();
 
 		// Store the resulting list of computers in the page
 		page.setList(computers);
@@ -147,16 +149,17 @@ public class ComputerDAOImpl implements ComputerDAO {
 
 		Session session = sessionFactory.getCurrentSession();
 		
-		Query query = null;
+		Criteria criteria = session.createCriteria(Computer.class).setProjection(Projections.rowCount());
 		
-		if(search == null)
-			query = session.createQuery("select count(computer.id) from Computer computer");
-		else {
-			query = session.createQuery("select count(computer.id) from Computer computer where computer.name LIKE :search OR computer.company.name LIKE :search");
-			query.setString("search", "%" + search + "%");
+		if(search != null) {
+			criteria.createAlias("company", "company", JoinType.LEFT_OUTER_JOIN);
+			
+			search = new StringBuilder("%").append(search).append("%").toString();
+			
+			criteria.add(Restrictions.or(Restrictions.like("this.name", search), Restrictions.like("company.name", search)));
 		}
 
-		return ((Long)query.uniqueResult()).intValue();
+		return ((Long)criteria.uniqueResult()).intValue();
 
 	}
 
