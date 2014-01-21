@@ -2,13 +2,15 @@ package com.formation.computerdb.persistence.dao.impl;
 
 import java.util.List;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.formation.computerdb.core.domain.Company;
-import com.formation.computerdb.persistence.dao.BaseDAO;
 import com.formation.computerdb.persistence.dao.CompanyDAO;
-import com.formation.computerdb.persistence.mapper.CompanyRowMapper;
 
 
 /**
@@ -18,9 +20,12 @@ import com.formation.computerdb.persistence.mapper.CompanyRowMapper;
  */
 @Repository
 @Transactional(readOnly=true)
-public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
+public class CompanyDAOImpl implements CompanyDAO {
 	
 	//private static Logger log = LoggerFactory.getLogger(CompanyDAOImpl.class);
+	
+	@Autowired
+	private SessionFactory sessionFactory;
 	
 	protected CompanyDAOImpl() {
 	}
@@ -30,9 +35,12 @@ public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
 	 */
 	public List<Company> getAll() {
 		
-		String query = "SELECT company.id, company.name FROM company";
+		Session session = sessionFactory.getCurrentSession();
 		
-		List<Company> companies = jdbcTemplate.query(query, new CompanyRowMapper());
+		Query query = session.createQuery("from Company company");
+		
+		@SuppressWarnings("unchecked")
+		List<Company> companies = query.list();
 			
 		return companies;
 	}
@@ -43,8 +51,8 @@ public class CompanyDAOImpl extends BaseDAO implements CompanyDAO {
 	 */
 	public Company get(int id) {
 
-		String query = new StringBuilder("SELECT company.id, company.name FROM company WHERE company.id = ?").toString();
-
-		return jdbcTemplate.queryForObject(query, new Object[] {id}, new CompanyRowMapper());
+		Session session = sessionFactory.getCurrentSession();
+		
+		return (Company) session.get(Company.class, new Long(id));
 	}
 }

@@ -13,7 +13,7 @@
 	<artifactId>computer-database-core</artifactId>
 
 	<dependencies>
-	    
+
 		<!-- Joda-Time -->
 		<dependency>
 			<groupId>joda-time</groupId>
@@ -21,33 +21,20 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<!-- Joda-Time <-> Hibernate -->
+		<dependency>
+			<groupId>org.jadira.usertype</groupId>
+			<artifactId>usertype.core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Hibernate annotations -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+
+
 	</dependencies>
-
-	<build>
-
-		<finalName>${project.artifactId}-${project.version}</finalName>
-		<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
-		<directory>${project.basedir}/target</directory>
-		<outputDirectory>${project.build.directory}/classes</outputDirectory>
-
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.0</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>

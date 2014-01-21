@@ -1,5 +1,16 @@
 package com.formation.computerdb.core.domain;
 
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
 /**
@@ -7,11 +18,32 @@ import org.joda.time.DateTime;
  * @author F. Miglianico
  *
  */
-public class Computer {
+@Entity
+@Table(name="computer")
+public class Computer implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue
 	private Long id;
+	
+	@Column(name="name")
 	private String name;
+	
+	@ManyToOne(targetEntity=com.formation.computerdb.core.domain.Company.class)
+	@JoinColumn(name="company_id")
 	private Company company;
+
+	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Column(name="introduced")
 	private DateTime introduced;
+	
+	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Column(name="discontinued")
 	private DateTime discontinued;
 
 	/**

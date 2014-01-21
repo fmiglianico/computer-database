@@ -7,23 +7,21 @@ package com.formation.computerdb.core.common;
  */
 public enum OrderByColumn {
 
-	COMPUTER_NAME_ASC("name", "asc", 2),
-	COMPUTER_NAME_DESC("name", "desc", 2),
-	INTRODUCED_DATE_ASC("introduced", "asc", 3),
-	INTRODUCED_DATE_DESC("introduced", "desc", 3),
-	DISCONTINUED_DATE_ASC("discontinued", "asc", 4),
-	DISCONTINUED_DATE_DESC("discontinued", "desc", 4),
-	COMPANY_NAME_ASC("company", "asc", 6),
-	COMPANY_NAME_DESC("company", "desc", 6);
+	COMPUTER_NAME_ASC("computer.name", "asc"),
+	COMPUTER_NAME_DESC("computer.name", "desc"),
+	INTRODUCED_DATE_ASC("computer.introduced", "asc"),
+	INTRODUCED_DATE_DESC("computer.introduced", "desc"),
+	DISCONTINUED_DATE_ASC("computer.discontinued", "asc"),
+	DISCONTINUED_DATE_DESC("computer.discontinued", "desc"),
+	COMPANY_NAME_ASC("computer.company.name", "asc"),
+	COMPANY_NAME_DESC("computer.company.name", "desc");
 	
 	private String colName = "";
 	private String dir = "asc";
-	private int colNumber = 1;
 	
-	private OrderByColumn(String colName, String dir, int colNumber ) {
+	private OrderByColumn(String colName, String dir) {
 		this.setColName(colName);
 		this.setDir(dir);
-		this.setColNumber(colNumber);
 	}
 
 	/**
@@ -52,20 +50,6 @@ public enum OrderByColumn {
 	 */
 	private void setDir(String dir) {
 		this.dir = dir;
-	}
-	
-	/**
-	 * @return the colNumber
-	 */
-	public int getColNumber() {
-		return colNumber;
-	}
-
-	/**
-	 * @param colNumber the colNumber to set
-	 */
-	public void setColNumber(int colNumber) {
-		this.colNumber = colNumber;
 	}
 	
 	/**

@@ -1,5 +1,14 @@
 package com.formation.computerdb.core.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
 import com.formation.computerdb.core.common.DBLogActionType;
@@ -10,9 +19,23 @@ import com.formation.computerdb.core.common.DBLogActionType;
  * @author F. Miglianico
  *
  */
+@Entity
+@Table(name="db_log")
 public class DBLog {
+
+	@Id
+	@GeneratedValue
+	private Long id;
+	
+	@Column(name="action")
+	@Enumerated(EnumType.STRING)
 	private DBLogActionType actionType;
+	
+	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Column(name="date")
 	private DateTime date;
+	
+	@Column(name="description")
 	private String description;
 	
 	public DBLog() {
@@ -39,6 +62,15 @@ public class DBLog {
 	public void setActionType(DBLogActionType actionType) {
 		this.actionType = actionType;
 	}
+	
+	public String getAction() {
+		return actionType.toString();
+	}
+	
+	public void setAction(String action) {
+		this.actionType = DBLogActionType.valueOf(action);
+	}
+	
 	/**
 	 * @return the date
 	 */

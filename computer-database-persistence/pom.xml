@@ -27,21 +27,29 @@
 			<artifactId>bonecp</artifactId>
 			<scope>compile</scope>
 		</dependency>
-
-		<!-- JDBC Template -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
 		<!-- Spring Framework dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<scope>compile</scope>
 		</dependency>
-
+		<!-- Spring hibernate -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Hibernate -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Javassist -->
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
