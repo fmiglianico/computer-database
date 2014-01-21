@@ -2,11 +2,10 @@ package com.formation.computerdb.persistence.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaQuery;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +24,8 @@ public class CompanyDAOImpl implements CompanyDAO {
 	
 	//private static Logger log = LoggerFactory.getLogger(CompanyDAOImpl.class);
 	
-	@Autowired
-	private SessionFactory sessionFactory;
+	@PersistenceContext(unitName="persistenceUnit")
+	private EntityManager em;
 	
 	protected CompanyDAOImpl() {
 	}
@@ -36,12 +35,10 @@ public class CompanyDAOImpl implements CompanyDAO {
 	 */
 	public List<Company> getAll() {
 		
-		Session session = sessionFactory.getCurrentSession();
+		CriteriaQuery<Company> criteria = em.getCriteriaBuilder().createQuery(Company.class);
+		criteria.from(Company.class);
 		
-		Criteria criteria = session.createCriteria(Company.class);
-		
-		@SuppressWarnings("unchecked")
-		List<Company> companies = criteria.list();
+		List<Company> companies = em.createQuery(criteria).getResultList();
 			
 		return companies;
 	}
@@ -51,11 +48,7 @@ public class CompanyDAOImpl implements CompanyDAO {
 	 * @param id the id
 	 */
 	public Company get(int id) {
-
-		Session session = sessionFactory.getCurrentSession();
-
-		Criteria criteria = session.createCriteria(Company.class).add(Restrictions.eq("id", new Long(id)));
 		
-		return (Company) criteria.uniqueResult();
+		return em.find(Company.class, new Long(id));
 	}
 }

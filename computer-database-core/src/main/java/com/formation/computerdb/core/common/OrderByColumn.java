@@ -13,8 +13,8 @@ public enum OrderByColumn {
 	INTRODUCED_DATE_DESC("introduced", "introduced", "desc"),
 	DISCONTINUED_DATE_ASC("discontinued", "discontinued", "asc"),
 	DISCONTINUED_DATE_DESC("discontinued", "discontinued", "desc"),
-	COMPANY_NAME_ASC("company.name", "company", "asc"),
-	COMPANY_NAME_DESC("company.name", "company", "desc");
+	COMPANY_NAME_ASC("name", "company", "asc"),
+	COMPANY_NAME_DESC("name", "company", "desc");
 	
 	private String colName = "";
 	private String colNameShort = "";

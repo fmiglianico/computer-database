@@ -34,7 +34,7 @@ public class Computer implements Serializable {
 	@Column(name="name")
 	private String name;
 	
-	@ManyToOne(targetEntity=com.formation.computerdb.core.domain.Company.class)
+	@ManyToOne(targetEntity=Company.class)
 	@JoinColumn(name="company_id")
 	private Company company;
 

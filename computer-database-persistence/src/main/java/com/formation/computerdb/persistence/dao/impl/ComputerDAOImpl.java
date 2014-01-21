@@ -2,19 +2,21 @@ package com.formation.computerdb.persistence.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.formation.computerdb.core.common.OrderByColumn;
 import com.formation.computerdb.core.common.Page;
+import com.formation.computerdb.core.domain.Company;
 import com.formation.computerdb.core.domain.Computer;
 import com.formation.computerdb.persistence.dao.ComputerDAO;
 
@@ -31,8 +33,8 @@ public class ComputerDAOImpl implements ComputerDAO {
 	// private static Logger log =
 	// LoggerFactory.getLogger(ComputerDAOImpl.class);
 
-	@Autowired
-	private SessionFactory sessionFactory;
+	@PersistenceContext(unitName="persistenceUnit")
+	private EntityManager em;
 
 	protected ComputerDAOImpl() {
 	}
@@ -43,10 +45,8 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 * @param id the id
 	 */
 	public Computer get(int id) {
-		
-		Session session = sessionFactory.getCurrentSession();
 
-		return (Computer) session.createCriteria(Computer.class).add(Restrictions.idEq(new Long(id))).uniqueResult();
+		return em.find(Computer.class, new Long(id));
 	}
 
 	/**
@@ -55,9 +55,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 	@Transactional(readOnly = false)
 	public void create(Computer computer) {
 
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.save(computer);
+		em.persist(computer);
 
 	}
 
@@ -67,9 +65,7 @@ public class ComputerDAOImpl implements ComputerDAO {
 	@Transactional(readOnly = false)
 	public void update(Computer computer) {
 
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.update(computer);
+		em.merge(computer);
 	}
 
 	/**
@@ -81,12 +77,8 @@ public class ComputerDAOImpl implements ComputerDAO {
 	@Transactional(readOnly = false)
 	public void delete(int id) {
 		
-		Computer computer = new Computer();
-		computer.setId(new Long(id));
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.delete(computer);
+		Computer computer = em.find(Computer.class, new Long(id));
+		em.remove(computer);
 	}
 
 	/**
@@ -94,47 +86,53 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 */
 	public void fill(Page page) {
 
-		Session session = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 		
-		Criteria criteria = session.createCriteria(Computer.class);
-
+		CriteriaQuery<Computer> cq = cb.createQuery(Computer.class);
+		
+		Root<Computer> computer = cq.from(Computer.class);
+		Join<Computer, Company> company = computer.join("company", JoinType.LEFT);
+		
 		// Search parameter
 		String search = page.getSearch();
-
-		if (search != null) {
-			criteria.createAlias("company", "company", JoinType.LEFT_OUTER_JOIN);
-			
+		
+		if(search != null) {
 			search = new StringBuilder("%").append(search).append("%").toString();
-			
-			criteria.add(Restrictions.or(Restrictions.like("this.name", search), Restrictions.like("company.name", search)));
+			cq.where(cb.or(cb.like(computer.get("name").as(String.class), search), cb.like(company.get("name").as(String.class), search)));
 		}
 
 		// Order By parameter
 		OrderByColumn orderBy = page.getOrderBy();
 		if (orderBy != null) {
-			
-			if(search == null && orderBy.getColNameShort().equals("company"))
-				criteria.createAlias("company", "company", JoinType.LEFT_OUTER_JOIN);
-			
-			if(orderBy.getDir().equals("asc"))
-				criteria.addOrder(Order.asc(orderBy.getColName()));
-			else
-				criteria.addOrder(Order.desc(orderBy.getColName()));
+			if(orderBy.getColNameShort().equals("company")) {
+				if(orderBy.getDir().equals("asc"))
+					cq.orderBy(cb.asc(company.get(orderBy.getColName())));
+				else
+					cq.orderBy(cb.desc(company.get(orderBy.getColName())));
+			} else {
+				if(orderBy.getDir().equals("asc"))
+					cq.orderBy(cb.asc(computer.get(orderBy.getColName())));
+				else
+					cq.orderBy(cb.desc(computer.get(orderBy.getColName())));
+				
+			}
 		}
+
+		Query query = em.createQuery(cq);
 		
 		// Number of rows parameter
 		Integer nbRows = page.getNbRows();
 		if (nbRows != null) {
-			criteria.setMaxResults(nbRows);
+			query.setMaxResults(nbRows);
 			Integer currPage = page.getCurrPage();
 			if (currPage != null) {
 				int offset = (currPage - 1) * nbRows;
-				criteria.setFirstResult(offset);
+				query.setFirstResult(offset);
 			}
 		}
 
 		@SuppressWarnings("unchecked")
-		List<Computer> computers = criteria.list();
+		List<Computer> computers = query.getResultList();
 
 		// Store the resulting list of computers in the page
 		page.setList(computers);
@@ -147,19 +145,23 @@ public class ComputerDAOImpl implements ComputerDAO {
 	 */
 	public int count(String search) {
 
-		Session session = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 		
-		Criteria criteria = session.createCriteria(Computer.class).setProjection(Projections.rowCount());
-		
+		// Count the total employees
+		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+		Root<Computer> computer = cq.from(Computer.class);
+		cq.select(cb.count(computer));
+
 		if(search != null) {
-			criteria.createAlias("company", "company", JoinType.LEFT_OUTER_JOIN);
+			Join<Computer, Company> company = computer.join("company", JoinType.LEFT);
 			
 			search = new StringBuilder("%").append(search).append("%").toString();
-			
-			criteria.add(Restrictions.or(Restrictions.like("this.name", search), Restrictions.like("company.name", search)));
+			cq.where(cb.or(cb.like(computer.get("name").as(String.class), search), cb.like(company.get("name").as(String.class), search)));
 		}
-
-		return ((Long)criteria.uniqueResult()).intValue();
+		
+		Query query = em.createQuery(cq);
+		
+		return ((Long)query.getSingleResult()).intValue();
 
 	}
 

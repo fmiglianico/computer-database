@@ -1,8 +1,8 @@
 package com.formation.computerdb.persistence.dao.impl;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.stereotype.Repository;
 
 import com.formation.computerdb.core.domain.DBLog;
@@ -20,16 +20,14 @@ public class DBLogDAOImpl implements DBLogDAO {
 	
 	//private final static Logger log = LoggerFactory.getLogger(DBLogDAOImpl.class);
 
-	@Autowired
-	private SessionFactory sessionFactory;
+	@PersistenceContext(unitName="persistenceUnit")
+	private EntityManager em;
 	
 	/**
 	 * Persist a log in DB
 	 */
 	public void create(DBLog dbLog) {
 		
-		Session session = sessionFactory.getCurrentSession();
-		
-		session.save(dbLog);
+		em.persist(dbLog);
 	}
 }

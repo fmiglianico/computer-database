@@ -13,7 +13,7 @@
 	<!-- Load the properties file -->
 	<context:property-placeholder location="classpath:datasource.properties" />
 	<context:property-placeholder location="classpath:hibernate.properties" />
-	
+
 
 	<!-- Datasource configuration -->
 	<bean id="dataSource" class="com.jolbox.bonecp.BoneCPDataSource"
@@ -25,17 +25,22 @@
 		<property name="maxConnectionsPerPartition" value="${max.connections.per.partition}" />
 	</bean>
 
-	<!-- Hibernate Session Factory -->
-	<bean id="sessionFactory"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+	<!-- Entity manager -->
+	<!-- <context:load-time-weaver/> -->
+
+	<bean id="emf"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="persistenceUnit" />
 		<property name="dataSource" ref="dataSource" />
 		<property name="packagesToScan" value="com.formation.computerdb.core.domain" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
 	</bean>
 
 	<!-- Transaction Manager -->
-	<bean id="txManager"
-		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-		<property name="sessionFactory" ref="sessionFactory" />
+	<bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<constructor-arg name="emf" ref="emf" />
 	</bean>
 
 	<tx:annotation-driven transaction-manager="txManager" />
