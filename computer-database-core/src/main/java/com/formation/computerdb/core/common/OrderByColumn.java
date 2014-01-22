@@ -1,5 +1,8 @@
 package com.formation.computerdb.core.common;
 
+import com.formation.computerdb.core.domain.QComputer;
+import com.mysema.query.types.OrderSpecifier;
+
 /**
  * Enum describing the different types of sort possible
  * @author F. Miglianico
@@ -7,51 +10,51 @@ package com.formation.computerdb.core.common;
  */
 public enum OrderByColumn {
 
-	COMPUTER_NAME_ASC("name", "name", "asc"),
-	COMPUTER_NAME_DESC("name", "name", "desc"),
-	INTRODUCED_DATE_ASC("introduced", "introduced", "asc"),
-	INTRODUCED_DATE_DESC("introduced", "introduced", "desc"),
-	DISCONTINUED_DATE_ASC("discontinued", "discontinued", "asc"),
-	DISCONTINUED_DATE_DESC("discontinued", "discontinued", "desc"),
-	COMPANY_NAME_ASC("name", "company", "asc"),
-	COMPANY_NAME_DESC("name", "company", "desc");
+	COMPUTER_NAME_ASC(QComputer.computer.name.asc(), "name", "asc"),
+	COMPUTER_NAME_DESC(QComputer.computer.name.desc(), "name", "desc"),
+	INTRODUCED_DATE_ASC(QComputer.computer.introduced.asc(), "introduced", "asc"),
+	INTRODUCED_DATE_DESC(QComputer.computer.introduced.desc(), "introduced", "desc"),
+	DISCONTINUED_DATE_ASC(QComputer.computer.discontinued.asc(), "discontinued", "asc"),
+	DISCONTINUED_DATE_DESC(QComputer.computer.discontinued.desc(), "discontinued", "desc"),
+	COMPANY_NAME_ASC(QComputer.computer.company.name.asc(), "company", "asc"),
+	COMPANY_NAME_DESC(QComputer.computer.company.name.desc(), "company", "desc");
 	
+	private OrderSpecifier<?> value;
 	private String colName = "";
-	private String colNameShort = "";
 	private String dir = "asc";
 	
-	private OrderByColumn(String colName, String colNameShort, String dir) {
+	private OrderByColumn(OrderSpecifier<?> value, String colName, String dir) {
+		this.setValue(value);
 		this.setColName(colName);
-		this.setColNameShort(colNameShort);
 		this.setDir(dir);
 	}
 
 	/**
 	 * @return the colName
 	 */
-	public String getColName() {
-		return colName;
+	public OrderSpecifier<?> getValue() {
+		return value;
 	}
 
 	/**
 	 * @param colName the colName to set
 	 */
-	private void setColName(String colName) {
-		this.colName = colName;
+	private void setValue(OrderSpecifier<?> value) {
+		this.value = value;
 	}
 
 	/**
 	 * @return the colNameShort
 	 */
-	public String getColNameShort() {
-		return colNameShort;
+	public String getColName() {
+		return colName;
 	}
 
 	/**
 	 * @param colNameShort the colNameShort to set
 	 */
-	public void setColNameShort(String colNameShort) {
-		this.colNameShort = colNameShort;
+	public void setColName(String colName) {
+		this.colName = colName;
 	}
 
 	/**
@@ -84,7 +87,7 @@ public enum OrderByColumn {
 		OrderByColumn[] list = OrderByColumn.values();
 		
 		for(OrderByColumn col : list) {
-			if(col.getColNameShort().equals(colName) && col.getDir().equals(dir))
+			if(col.getColName().equals(colName) && col.getDir().equals(dir))
 				return col;
 		}
 		return null;
@@ -97,7 +100,7 @@ public enum OrderByColumn {
 	 */
 	public String getDirForCol(String col) {
 		
-		if(this.getColNameShort().equals(col) && this.getDir().equals("asc"))
+		if(this.getColName().equals(col) && this.getDir().equals("asc"))
 			return "desc";
 		
 		return "asc";

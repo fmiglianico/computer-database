@@ -19,7 +19,7 @@
 		<joda-time-jsptags.version>1.1.1</joda-time-jsptags.version>
 		<joda-time-hibernate.version>1.3</joda-time-hibernate.version>
 		<jadira.version>3.1.0.CR10</jadira.version>
-		
+
 		<logback.version>1.0.13</logback.version>
 		<jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
 
@@ -31,6 +31,9 @@
 		<persistence-api.version>1.0.2</persistence-api.version>
 
 		<javassist.version>3.18.1-GA</javassist.version>
+
+		<querydsl.version>3.3.0</querydsl.version>
+		<querydsl-hql.version>1.9.7</querydsl-hql.version>
 	</properties>
 
 	<dependencyManagement>
@@ -230,6 +233,23 @@
 						<groupId>commons-logging</groupId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+
+			<!-- Query DSL -->
+			<dependency>
+				<groupId>com.mysema.querydsl</groupId>
+				<artifactId>querydsl-apt</artifactId>
+				<version>${querydsl.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.mysema.querydsl</groupId>
+				<artifactId>querydsl-jpa</artifactId>
+				<version>${querydsl.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.mysema.querydsl</groupId>
+				<artifactId>querydsl-core</artifactId>
+				<version>${querydsl.version}</version>
 			</dependency>
 
 		</dependencies>

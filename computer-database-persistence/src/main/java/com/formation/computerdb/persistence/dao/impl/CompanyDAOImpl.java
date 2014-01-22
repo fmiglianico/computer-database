@@ -4,13 +4,14 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaQuery;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.formation.computerdb.core.domain.Company;
+import com.formation.computerdb.core.domain.QCompany;
 import com.formation.computerdb.persistence.dao.CompanyDAO;
+import com.mysema.query.jpa.impl.JPAQuery;
 
 
 /**
@@ -27,20 +28,16 @@ public class CompanyDAOImpl implements CompanyDAO {
 	@PersistenceContext(unitName="persistenceUnit")
 	private EntityManager em;
 	
-	protected CompanyDAOImpl() {
-	}
-	
 	/**
 	 * Get all the companies in DB
 	 */
 	public List<Company> getAll() {
 		
-		CriteriaQuery<Company> criteria = em.getCriteriaBuilder().createQuery(Company.class);
-		criteria.from(Company.class);
+		JPAQuery query = new JPAQuery(em);
 		
-		List<Company> companies = em.createQuery(criteria).getResultList();
+		QCompany company = QCompany.company;
 			
-		return companies;
+		return query.from(company).list(company);
 	}
 
 	/**
