@@ -1,7 +1,6 @@
 package com.formation.computerdb.core.common;
 
-import com.formation.computerdb.core.domain.QComputer;
-import com.mysema.query.types.OrderSpecifier;
+import org.springframework.data.domain.Sort;
 
 /**
  * Enum describing the different types of sort possible
@@ -10,20 +9,20 @@ import com.mysema.query.types.OrderSpecifier;
  */
 public enum OrderByColumn {
 
-	COMPUTER_NAME_ASC(QComputer.computer.name.asc(), "name", "asc"),
-	COMPUTER_NAME_DESC(QComputer.computer.name.desc(), "name", "desc"),
-	INTRODUCED_DATE_ASC(QComputer.computer.introduced.asc(), "introduced", "asc"),
-	INTRODUCED_DATE_DESC(QComputer.computer.introduced.desc(), "introduced", "desc"),
-	DISCONTINUED_DATE_ASC(QComputer.computer.discontinued.asc(), "discontinued", "asc"),
-	DISCONTINUED_DATE_DESC(QComputer.computer.discontinued.desc(), "discontinued", "desc"),
-	COMPANY_NAME_ASC(QComputer.computer.company.name.asc(), "company", "asc"),
-	COMPANY_NAME_DESC(QComputer.computer.company.name.desc(), "company", "desc");
+	COMPUTER_NAME_ASC(new Sort(Sort.Direction.ASC, "name"), "name", "asc"),
+	COMPUTER_NAME_DESC(new Sort(Sort.Direction.DESC, "name"), "name", "desc"),
+	INTRODUCED_DATE_ASC(new Sort(Sort.Direction.ASC, "introduced"), "introduced", "asc"),
+	INTRODUCED_DATE_DESC(new Sort(Sort.Direction.DESC, "introduced"), "introduced", "desc"),
+	DISCONTINUED_DATE_ASC(new Sort(Sort.Direction.ASC, "discontinued"), "discontinued", "asc"),
+	DISCONTINUED_DATE_DESC(new Sort(Sort.Direction.DESC, "discontinued"), "discontinued", "desc"),
+	COMPANY_NAME_ASC(new Sort(Sort.Direction.ASC, "company.name"), "company", "asc"),
+	COMPANY_NAME_DESC(new Sort(Sort.Direction.DESC, "company.name"), "company", "desc");
 	
-	private OrderSpecifier<?> value;
+	private Sort value;
 	private String colName = "";
 	private String dir = "asc";
 	
-	private OrderByColumn(OrderSpecifier<?> value, String colName, String dir) {
+	private OrderByColumn(Sort value, String colName, String dir) {
 		this.setValue(value);
 		this.setColName(colName);
 		this.setDir(dir);
@@ -32,14 +31,14 @@ public enum OrderByColumn {
 	/**
 	 * @return the colName
 	 */
-	public OrderSpecifier<?> getValue() {
+	public Sort getValue() {
 		return value;
 	}
 
 	/**
 	 * @param colName the colName to set
 	 */
-	private void setValue(OrderSpecifier<?> value) {
+	private void setValue(Sort value) {
 		this.value = value;
 	}
 

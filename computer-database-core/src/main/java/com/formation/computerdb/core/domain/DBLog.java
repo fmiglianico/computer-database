@@ -1,5 +1,7 @@
 package com.formation.computerdb.core.domain;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -21,7 +23,12 @@ import com.formation.computerdb.core.common.DBLogActionType;
  */
 @Entity
 @Table(name="db_log")
-public class DBLog {
+public class DBLog implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue

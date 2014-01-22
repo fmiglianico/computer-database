@@ -34,6 +34,8 @@
 
 		<querydsl.version>3.3.0</querydsl.version>
 		<querydsl-hql.version>1.9.7</querydsl-hql.version>
+		
+		<spring-data-jpa.version>1.4.3.RELEASE</spring-data-jpa.version>
 	</properties>
 
 	<dependencyManagement>
@@ -250,6 +252,13 @@
 				<groupId>com.mysema.querydsl</groupId>
 				<artifactId>querydsl-core</artifactId>
 				<version>${querydsl.version}</version>
+			</dependency>
+
+			<!-- Spring Data JPA -->
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-jpa</artifactId>
+				<version>${spring-data-jpa.version}</version>
 			</dependency>
 
 		</dependencies>
