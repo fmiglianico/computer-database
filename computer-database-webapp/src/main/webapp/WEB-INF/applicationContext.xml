@@ -6,6 +6,8 @@
        		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 	
     
+	<import resource="spring-security.xml"/>
+	
 	<!-- binds messages_xx_XX.properties -->
 
 	<bean id="messageSource"

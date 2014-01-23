@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ErrorController {
 
+	@RequestMapping(value = "/error/401.html")
+	public String handle401() {
+		return "error/401";
+	}
+
 	@RequestMapping(value = "/error/403.html")
 	public String handle403() {
 		return "error/403";
