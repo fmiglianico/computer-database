@@ -4,13 +4,12 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.formation.computerdb.core.common.DBLogActionType;
-import com.formation.computerdb.core.common.Page;
 import com.formation.computerdb.core.domain.Company;
 import com.formation.computerdb.core.domain.Computer;
 import com.formation.computerdb.core.domain.DBLog;
@@ -120,28 +119,17 @@ public class DataServiceImpl implements DataService {
 	 * .domain.Page)
 	 */
 	@Override
-	public void fill(Page page) {
-
-		Sort order = page.getOrderBy() == null ? null : page.getOrderBy()
-				.getValue();
-
-		// getCurrPage - 1 because pages are indexed [1...n] on client side and
-		// [0...n-1] on Repository side
-		PageRequest pageRequest = new PageRequest(page.getCurrPage() - 1,
-				page.getNbRows(), order);
-
-		String search = page.getSearch();
-		org.springframework.data.domain.Page<Computer> result = null;
+	public Page<Computer> retrievePage(Pageable pageable, String search) {
+		
+		Page<Computer> page = null;
 
 		if (search == null)
-			result = computerDAO.findAll(pageRequest);
-		else {
-			search = new StringBuilder("%").append(search).append("%").toString();
-			result = computerDAO.findAll(search, pageRequest);
-		}
-
-		page.setList(result.getContent());
-		page.setNbComputers((int) result.getTotalElements());
+			page = computerDAO.findAll(pageable);
+		else
+			page = computerDAO.findAll(new StringBuilder("%").append(search.toLowerCase()).append("%").toString(), pageable);
+		
+		return page;
+		
 	}
 
 	/*

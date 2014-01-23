@@ -9,7 +9,7 @@
 <div class="container theme-showcase">
 	
 	<div class="page-header">
-		<h1><spring:message code="dashboard.title" arguments="${wrap.nbComputers}"/></h1>
+		<h1><spring:message code="dashboard.title" arguments="${wrap.totalElements}"/></h1>
 	</div>
 	
 	<c:if test="${not empty message}">
@@ -24,8 +24,8 @@
 				<label class="sr-only" for="search">Search</label>
 				<spring:message code="dashboard.search.placeholder" var="searchPlaceholder"/>
 				<input type="search" id="searchbox" name="search"
-					value="${wrap.search}" placeholder="${searchPlaceholder}" class="form-control">
-				<input type="hidden" name="nbrows" value="${wrap.nbRows}"/>
+					value="${search}" placeholder="${searchPlaceholder}" class="form-control">
+				<input type="hidden" name="nbrows" value="${wrap.size}"/>
 			</div>
 			<div class="form-group">
 				<spring:message code="dashboard.search.button" var="searchButton"/>
@@ -34,7 +34,7 @@
 					class="btn btn-primary" />
 			</div>
 		</form>
-		<cdblib:limitsetter wrap="${wrap}"/>
+		<cdblib:limitsetter wrap="${wrap}" search="${search}" orderBy="${orderBy}"/>
 		<a class="btn btn-primary" id="add" href="addComputer"><spring:message code="dashboard.add.computer.button"/></a>
 	</div>
 	<p/>
@@ -44,24 +44,24 @@
 					<!-- Variable declarations for passing labels as parameters -->
 					<!-- Table header for Computer Name -->
 					<th id="name">
-						<cdblib:link wrap="${wrap}" orderby="name">
+						<cdblib:link wrap="${wrap}" newOrderBy="name" search="${search}" orderBy="${orderBy}">
 							<spring:message code="dashboard.table.computer.name"/>
 						</cdblib:link>
 					</th>
 					<th id="intro">
-						<cdblib:link wrap="${wrap}" orderby="introduced">
+						<cdblib:link wrap="${wrap}" newOrderBy="introduced" search="${search}" orderBy="${orderBy}">
 							<spring:message code="dashboard.table.introduced"/>
 						</cdblib:link>
 					</th>
 					<!-- Table header for Discontinued Date -->
 					<th id="disco">
-						<cdblib:link wrap="${wrap}" orderby="discontinued">
+						<cdblib:link wrap="${wrap}" newOrderBy="discontinued" search="${search}" orderBy="${orderBy}">
 							<spring:message code="dashboard.table.discontinued"/>
 						</cdblib:link>
 					</th>
 					<!-- Table header for Company -->
 					<th id="company">
-						<cdblib:link wrap="${wrap}" orderby="company">
+						<cdblib:link wrap="${wrap}" newOrderBy="company" search="${search}" orderBy="${orderBy}">
 							<spring:message code="dashboard.table.company"/>
 						</cdblib:link>
 					</th>
@@ -70,7 +70,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach items="${wrap.list}" var="c">
+				<c:forEach items="${wrap.content}" var="c">
                <tr>
 						<td><a href="editComputer?id=${ c.id }" onclick="">${ c.name }</a></td>
 						<spring:message code="date.format" var="dateFormat"/>
@@ -86,7 +86,7 @@
 			</tbody>
 		</table>
 		<div class="center-block">
-			<cdblib:pager wrap="${wrap}" />
+			<cdblib:pager wrap="${wrap}" search="${search}"/>
 		</div>
 </div>
 

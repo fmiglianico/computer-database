@@ -2,24 +2,26 @@ package com.formation.computerdb.service.service;
 
 import java.util.List;
 
-import com.formation.computerdb.core.common.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.formation.computerdb.core.domain.Company;
 import com.formation.computerdb.core.domain.Computer;
 
 public interface DataService {
 
-	public abstract Computer getComputer(int id);
+	public Computer getComputer(int id);
 
-	public abstract void createComputer(Computer computer);
+	public void createComputer(Computer computer);
 
-	public abstract void updateComputer(Computer computer);
+	public void updateComputer(Computer computer);
 
-	public abstract void deleteComputer(int id);
+	public void deleteComputer(int id);
 
-	public abstract void fill(Page page);
+	public Page<Computer> retrievePage(Pageable pageable, String search);
 
-	public abstract List<Company> getAllCompanies();
+	public List<Company> getAllCompanies();
 
-	public abstract Company getCompany(int id);
+	public Company getCompany(int id);
 
 }
