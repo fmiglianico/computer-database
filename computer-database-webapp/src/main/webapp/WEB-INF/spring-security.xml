@@ -7,27 +7,40 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-	<http pattern="/dashboard" security="none" />
 	<http pattern="/static/**" security="none" />
-	<http auto-config="true" create-session="stateless">
-		<intercept-url pattern="/addComputer" access="ROLE_USER" method="GET"/>
-		<intercept-url pattern="/addComputer" access="ROLE_USER" method="POST"/>
-		
-		<intercept-url pattern="/editComputer" access="ROLE_USER" method="GET"/>
-		<intercept-url pattern="/editComputer" access="ROLE_USER" method="POST" />
-		
-		<intercept-url pattern="/deleteComputer" access="ROLE_USER" method="POST"/>
-		
-		<intercept-url pattern="/**" access="ROLE_USER" />
-		<http-basic />
+	<http pattern="/login" security="none" />
+	<http use-expressions="true">
+		<intercept-url pattern="/addComputer"
+			access="hasRole('ROLE_CONTRIBUTOR') or hasRole('ROLE_EDITOR') or hasRole('ROLE_ADMIN')"
+			method="GET" />
+		<intercept-url pattern="/addComputer"
+			access="hasRole('ROLE_CONTRIBUTOR') or hasRole('ROLE_EDITOR') or hasRole('ROLE_ADMIN')"
+			method="POST" />
+
+		<intercept-url pattern="/editComputer"
+			access="hasRole('ROLE_EDITOR') or hasRole('ROLE_ADMIN')" method="GET" />
+		<intercept-url pattern="/editComputer"
+			access="hasRole('ROLE_EDITOR') or hasRole('ROLE_ADMIN')" method="POST" />
+
+		<intercept-url pattern="/deleteComputer" access="hasRole('ROLE_ADMIN')"
+			method="GET" />
+		<intercept-url pattern="/deleteComputer" access="hasRole('ROLE_ADMIN')"
+			method="POST" />
+	
+		<http-basic/>
+
+		<form-login login-page="/login" default-target-url="/dashboard" authentication-failure-url="/login?error"/>
+		<logout logout-success-url="/dashboard" />
+
 	</http>
 
 	<authentication-manager>
 		<authentication-provider>
-			<user-service>
-				<user name="admin" password="5f4dcc3b5aa765d61d8327deb882cf99" authorities="ROLE_USER" />
-			</user-service>
-			<password-encoder hash="md5"/>
+			<jdbc-user-service data-source-ref="dataSource"
+				users-by-username-query="select username, password, enabled from users where username = ?"
+				authorities-by-username-query="select u.username, ur.role from users u, user_role ur 
+		      where u.role_id = ur.id and u.username =?" />
+			<password-encoder hash="md5" />
 		</authentication-provider>
 	</authentication-manager>
 

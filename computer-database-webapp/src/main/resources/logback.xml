@@ -9,6 +9,8 @@
 	</appender>
 
 	<logger name="com.formation" level="TRACE" />
+	
+	<logger name="org.springframework.security" level="DEBUG" />
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

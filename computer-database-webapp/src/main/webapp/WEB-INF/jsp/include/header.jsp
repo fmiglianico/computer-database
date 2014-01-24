@@ -1,8 +1,11 @@
+<!DOCTYPE html>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-<!DOCTYPE html>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
 <html>
 <head>
 <title><spring:message code="header.title"/></title>
@@ -31,3 +34,13 @@
 			</div>
 		</div>
 	</div>
+	<sec:authorize access="isAuthenticated()">
+		<div class="container">
+			<div class="text-right small">
+				<spring:message code="logout.message"/> <b><sec:authentication property="principal.username" /></b>,
+				<a href='<c:url value="j_spring_security_logout" />'>
+					<spring:message code="logout" />
+				</a>
+			</div>
+		</div>
+	</sec:authorize>

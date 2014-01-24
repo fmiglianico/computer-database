@@ -44,24 +44,24 @@
 					<!-- Variable declarations for passing labels as parameters -->
 					<!-- Table header for Computer Name -->
 					<th id="name">
-						<cdblib:link wrap="${wrap}" newOrderBy="name" search="${search}" orderBy="${orderBy}">
+						<cdblib:link wrap="${wrap}" newOrderBy="name" search="${search}" orderBy="${orderby}">
 							<spring:message code="dashboard.table.computer.name"/>
 						</cdblib:link>
 					</th>
 					<th id="intro">
-						<cdblib:link wrap="${wrap}" newOrderBy="introduced" search="${search}" orderBy="${orderBy}">
+						<cdblib:link wrap="${wrap}" newOrderBy="introduced" search="${search}" orderBy="${orderby}">
 							<spring:message code="dashboard.table.introduced"/>
 						</cdblib:link>
 					</th>
 					<!-- Table header for Discontinued Date -->
 					<th id="disco">
-						<cdblib:link wrap="${wrap}" newOrderBy="discontinued" search="${search}" orderBy="${orderBy}">
+						<cdblib:link wrap="${wrap}" newOrderBy="discontinued" search="${search}" orderBy="${orderby}">
 							<spring:message code="dashboard.table.discontinued"/>
 						</cdblib:link>
 					</th>
 					<!-- Table header for Company -->
 					<th id="company">
-						<cdblib:link wrap="${wrap}" newOrderBy="company" search="${search}" orderBy="${orderBy}">
+						<cdblib:link wrap="${wrap}" newOrderBy="company" search="${search}" orderBy="${orderby}">
 							<spring:message code="dashboard.table.company"/>
 						</cdblib:link>
 					</th>
@@ -72,21 +72,48 @@
 			<tbody>
 				<c:forEach items="${wrap.content}" var="c">
                <tr>
-						<td><a href="editComputer?id=${ c.id }" onclick="">${ c.name }</a></td>
-						<spring:message code="date.format" var="dateFormat"/>
-						<td><joda:format value="${c.introduced}" pattern="${dateFormat}"/></td>
-						<td><joda:format value="${c.discontinued}" pattern="${dateFormat}"/></td>
-						<td>${c.company.name }</td>
 						<td>
-							<a class="btn btn-sm btn-default" id="edit" href="editComputer?id=${ c.id }"><spring:message code="dashboard.table.actions.edit"/></a>
-							<a class="btn btn-sm btn-default" id="delete" href="deleteComputer?id=${ c.id }"><spring:message code="dashboard.table.actions.delete"/></a>
+							<a href="editComputer?id=${ c.id }" onclick="">${ c.name }</a>
+						</td>
+						<spring:message code="date.format" var="dateFormat"/>
+						<c:choose>
+							<c:when test="${c.introduced != null}">
+								<td><joda:format value="${c.introduced}" pattern="${dateFormat}"/></td>
+							</c:when>
+							<c:otherwise>
+								<td>- -</td>
+							</c:otherwise>
+						</c:choose>
+						<c:choose>
+							<c:when test="${c.discontinued != null}">
+								<td><joda:format value="${c.discontinued}" pattern="${dateFormat}"/></td>
+							</c:when>
+							<c:otherwise>
+								<td>- -</td>
+							</c:otherwise>
+						</c:choose>
+						<c:choose>
+							<c:when test="${c.company != null}">
+								<td>${c.company.name }</td>
+							</c:when>
+							<c:otherwise>
+								<td>- -</td>
+							</c:otherwise>
+						</c:choose>
+						<td>
+							<a class="btn btn-sm btn-default" id="edit" href="editComputer?id=${ c.id }">
+								<spring:message code="dashboard.table.actions.edit"/>
+							</a>
+							<a class="btn btn-sm btn-default" id="delete" href="deleteComputer?id=${ c.id }">
+								<spring:message code="dashboard.table.actions.delete"/>
+							</a>
 						</td>
 					</tr>
    			 </c:forEach>
 			</tbody>
 		</table>
 		<div class="center-block">
-			<cdblib:pager wrap="${wrap}" search="${search}"/>
+			<cdblib:pager wrap="${wrap}" search="${search}" orderBy="${orderby}" />
 		</div>
 </div>
 
