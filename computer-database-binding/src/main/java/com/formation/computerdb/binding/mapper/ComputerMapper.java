@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.formation.computerdb.core.domain.Computer;
 import com.formation.computerdb.core.dto.ComputerDto;
-import com.formation.computerdb.service.service.DataService;
+import com.formation.computerdb.persistence.dao.CompanyDAO;
 
 /**
  * Mapper @Computer/@ComputerDto
@@ -23,7 +23,7 @@ import com.formation.computerdb.service.service.DataService;
 public class ComputerMapper {
 	
 	@Autowired
-	private DataService ds;
+	private CompanyDAO companyDAO;
 	
 	private final static ResourceBundle bundle = ResourceBundle.getBundle("messages");
 	
@@ -34,7 +34,7 @@ public class ComputerMapper {
 	 * @param computer the computer
 	 * @return the computerDto
 	 */
-	public static ComputerDto toDto(Computer computer) {
+	public ComputerDto toDto(Computer computer) {
 		
 		if(bundle == null) {
 			log.error("Cannot find resource bundle");
@@ -90,7 +90,7 @@ public class ComputerMapper {
 		
 		Long companyId = cdto.getCompanyId();
 		if(companyId != null)
-			computer.setCompany(ds.getCompany(companyId.intValue()));
+			computer.setCompany(companyDAO.findOne(companyId));
 		
 		return computer;
 		

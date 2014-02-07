@@ -16,7 +16,6 @@
 	</bean>
 	
 	<!-- Get and load the service and persistence xml -->
-	<import resource="classpath:persistence-context.xml"/>
 	<import resource="classpath:service-context.xml"/>
 	<import resource="classpath:binding-context.xml"/>
 

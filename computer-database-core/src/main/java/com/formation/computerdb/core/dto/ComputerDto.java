@@ -1,11 +1,16 @@
 package com.formation.computerdb.core.dto;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 
 
 /**
  * Class representing a Computer as a Data Transport Object
  * @author F. Miglianico
  */
+@XmlRootElement
 public class ComputerDto {
 	
 	/**
@@ -40,6 +45,7 @@ public class ComputerDto {
 	/**
 	 * @return the id
 	 */
+	@XmlAttribute
 	public Long getId() {
 		return id;
 	}
@@ -54,6 +60,7 @@ public class ComputerDto {
 	/**
 	 * @return the name
 	 */
+	@XmlElement
 	public String getName() {
 		return name;
 	}
@@ -63,9 +70,11 @@ public class ComputerDto {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	/**
 	 * @return the introduced
 	 */
+	@XmlElement
 	public String getIntroduced() {
 		return introduced;
 	}
@@ -75,9 +84,11 @@ public class ComputerDto {
 	public void setIntroduced(String introduced) {
 		this.introduced = introduced;
 	}
+	
 	/**
 	 * @return the discontinued
 	 */
+	@XmlElement
 	public String getDiscontinued() {
 		return discontinued;
 	}
@@ -87,9 +98,11 @@ public class ComputerDto {
 	public void setDiscontinued(String discontinued) {
 		this.discontinued = discontinued;
 	}
+	
 	/**
 	 * @return the companyId
 	 */
+	@XmlElement
 	public Long getCompanyId() {
 		return companyId;
 	}

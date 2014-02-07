@@ -75,7 +75,7 @@ public class EditComputerController {
 			return "redirect:dashboard";
 		
 		Computer computer = ds.getComputer(id.intValue());
-		ComputerDto cdto = ComputerMapper.toDto(computer);
+		ComputerDto cdto = computerMapper.toDto(computer);
 		model.addAttribute(COMPUTER_DTO_LABEL, cdto);
 
 		return "editComputer";
